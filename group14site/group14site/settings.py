@@ -74,9 +74,13 @@ WSGI_APPLICATION = 'group14site.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "group14",
+        "USER": "group14",
+        "PASSWORD": "I4yeI1U1",
+        "HOST": "bastion.cs.virginia.edu",
+        "PORT": "5432",
     }
 }
 
