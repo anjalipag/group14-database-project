@@ -11,7 +11,6 @@ def index(request):
             username = request.POST.get("username")
             password = request.POST.get("password")
 
-            # Check if username already exists
             with connection.cursor() as cursor:
                 cursor.execute("SELECT user_id FROM Users WHERE username = %s", [username])
                 existing_user = cursor.fetchone()

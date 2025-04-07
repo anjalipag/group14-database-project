@@ -3,61 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Home - TuneIn</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <script>
         function toggleSignupForm() {
             var form = document.getElementById("signupForm");
-            if (form.style.display === "none") {
-                form.style.display = "block";
-            } else {
-                form.style.display = "none";
-            }
+            form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
         }
 
         // Keep the form visible if there's an error or success message
         window.onload = function() {
-            var errorMessage = "{{ error_message|escapejs }}";
-            var successMessage = "{{ success_message|escapejs }}";
-            if (errorMessage || successMessage) {
+            var errorMessage = "{{ error_message|default:''|escapejs }}";
+            var successMessage = "{{ success_message|default:''|escapejs }}";
+
+            if (errorMessage.trim() !== "" || successMessage.trim() !== "") {
                 document.getElementById("signupForm").style.display = "block";
             }
         };
     </script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .btn-group {
+            margin-top: 20px;
+        }
+        #signupForm {
+            margin-top: 20px;
+            display: none;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
-    <h2>Welcome to TuneIn!</h2>
 
-    <!-- Go to Login Page Button -->
-    <a href="/login/">
-        <button>Login</button>
-    </a>
-    <br>
-    <br>
+    <div class="container">
+        <h2 class="mb-4">Welcome to <span class="text-primary">TuneIn</span>!</h2>
 
-    <!-- Button to Show/Hide Sign-Up Form -->
-    <button onclick="toggleSignupForm()">Sign Up</button>
+        <div class="d-flex justify-content-center mt-3">
+            <a href="/login/" class="btn btn-primary mx-2 px-4 py-2 rounded-pill">Login</a>
+            <button class="btn btn-success mx-2 px-4 py-2 rounded-pill" onclick="toggleSignupForm()">Sign Up</button>
+        </div>
 
-    <!-- Sign-Up Form (Initially Hidden) -->
-    <div id="signupForm" style="display: none;">
-        <h3>Sign Up</h3>
-        <form method="POST">
-            {% csrf_token %}
-            <label for="username">Username:</label>
-            <input type="text" name="username" required><br><br>
+        <div id="signupForm">
+            <h3>Sign Up</h3>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" name="username" required>
+                </div>
 
-            <label for="password">Password:</label>
-            <input type="password" name="password" required><br><br>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" name="password" required>
+                </div>
 
-            <button type="submit" name="signup">Sign Up</button>
-        </form>
+                <button type="submit" class="btn btn-success w-100" name="signup">Sign Up</button>
+            </form>
 
-        {% if error_message %}
-            <p style="color: red;">{{ error_message }}</p>
-        {% endif %}
+            {% if error_message %}
+                <div class="alert alert-danger mt-3">{{ error_message }}</div>
+            {% endif %}
 
-        {% if success_message %}
-            <p style="color: green;">{{ success_message }}</p>
-        {% endif %}
+            {% if success_message %}
+                <div class="alert alert-success mt-3">{{ success_message }}</div>
+            {% endif %}
+        </div>
     </div>
+
+    <!-- Bootstrap JS Bundle (Optional, for Bootstrap components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
