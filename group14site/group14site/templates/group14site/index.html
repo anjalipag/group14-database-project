@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script>
+        function toggleSignupForm() {
+            var form = document.getElementById("signupForm");
+            if (form.style.display === "none") {
+                form.style.display = "block";
+            } else {
+                form.style.display = "none";
+            }
+        }
+
+        // Keep the form visible if there's an error or success message
+        window.onload = function() {
+            var errorMessage = "{{ error_message|escapejs }}";
+            var successMessage = "{{ success_message|escapejs }}";
+            if (errorMessage || successMessage) {
+                document.getElementById("signupForm").style.display = "block";
+            }
+        };
+    </script>
+</head>
+<body>
+    <h2>Welcome to TuneIn!</h2>
+
+    <!-- Go to Login Page Button -->
+    <a href="/login/">
+        <button>Login</button>
+    </a>
+    <br>
+    <br>
+
+    <!-- Button to Show/Hide Sign-Up Form -->
+    <button onclick="toggleSignupForm()">Sign Up</button>
+
+    <!-- Sign-Up Form (Initially Hidden) -->
+    <div id="signupForm" style="display: none;">
+        <h3>Sign Up</h3>
+        <form method="POST">
+            {% csrf_token %}
+            <label for="username">Username:</label>
+            <input type="text" name="username" required><br><br>
+
+            <label for="password">Password:</label>
+            <input type="password" name="password" required><br><br>
+
+            <button type="submit" name="signup">Sign Up</button>
+        </form>
+
+        {% if error_message %}
+            <p style="color: red;">{{ error_message }}</p>
+        {% endif %}
+
+        {% if success_message %}
+            <p style="color: green;">{{ success_message }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
