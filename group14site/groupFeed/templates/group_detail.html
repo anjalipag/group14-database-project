@@ -1,0 +1,64 @@
+{% load static %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<div class="container my-5">
+
+  <!-- Post Detail -->
+  <div class="card mb-5 shadow-lg">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">{{ post.title }}</h2>
+    </div>
+    <div class="card-body">
+      <p class="mb-3"><strong>Description:</strong> {{ post.description }}</p>
+
+      <div class="row text-center">
+        <div class="col-md-3 mb-3">
+          <span class="badge badge-success p-2 w-100 ">Upvotes: {{ post.up_vote_count }}</span>
+        </div>
+        <div class="col-md-3 mb-3">
+          <span class="badge badge-danger p-2 w-100">Downvotes: {{ post.down_vote_count }}</span>
+        </div>
+        <div class="col-md-3 mb-3">
+          <span class="badge badge-warning p-2 w-100">Rating: {{ post.overall_rating }}/5 </span>
+        </div>
+        <div class="col-md-3 mb-3">
+          <span class="badge badge-info p-2 w-100">Category: {{ post.category_name }}</span>
+        </div>
+      </div>
+
+
+
+      <p class="text-muted mb-0">
+        Posted by <strong>{{ post.posted_by }}</strong> on {{ post.time_stamp }}
+      </p>
+
+      <div class="mt-4 mb-3 d-flex">
+        <a href="#" class="btn btn-outline-primary mr-2">Interact Now!</a>
+        {% if post.extra_info %}
+          <a href="{{ post.extra_info }}" class="btn btn-info" target="_blank">Learn More</a>
+        {% endif %}
+      </div>
+
+  <!-- Comments Section -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">
+      <h4 class="mb-0">Comments</h4>
+    </div>
+    <div class="card-body">
+      {% if comments_for_post %}
+        {% for comment in comments_for_post %}
+          <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between">
+              <strong>{{ comment.posted_by }}</strong>
+              <small class="text-muted">{{ comment.time_posted }}</small>
+            </div>
+            <p class="mt-2 mb-0">{{ comment.comment_text }}</p>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No comments yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
