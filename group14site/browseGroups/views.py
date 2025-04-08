@@ -19,10 +19,13 @@ def get_user_id_by_username(username):
 def get_groups_not_joined_by_user(user_id):
     with connection.cursor() as c:
         c.execute("""
-            SELECT * FROM groups
-            WHERE group_id NOT IN (
+            SELECT g.group_id, g.group_name, g.group_description AS group_description, g.group_photo AS group_photo_url,
+                   u.username AS admin_username
+            FROM groups g
+            JOIN users u ON g.admin_id = u.user_id
+            WHERE g.group_id NOT IN (
                 SELECT group_id FROM groupsmembers WHERE user_id = %s
-            )
+                )
         """, [user_id])
         cols = [col[0] for col in c.description]
         groups = [dict(zip(cols, row)) for row in c.fetchall()]
