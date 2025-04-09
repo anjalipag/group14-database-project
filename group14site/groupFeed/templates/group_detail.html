@@ -25,18 +25,18 @@
         </div>
       </div>
 
-
-
       <p class="text-muted mb-0">
         Posted by <strong>{{ post.posted_by }}</strong> on {{ post.time_stamp }}
       </p>
 
       <div class="mt-4 mb-3 d-flex">
-<a href="#" class="btn btn-outline-primary mr-2" data-toggle="modal" data-target="#commentModal">Add Comment</a>
+        <a href="#" class="btn btn-outline-primary mr-2" data-toggle="modal" data-target="#commentModal">Add Comment</a>
         {% if post.extra_info %}
           <a href="{{ post.extra_info }}" class="btn btn-info" target="_blank">Learn More</a>
         {% endif %}
       </div>
+    </div>
+  </div>
 
   <!-- Comments Section -->
   <div class="card shadow-sm">
@@ -59,9 +59,10 @@
       {% endif %}
     </div>
   </div>
+
 </div>
 
-  <!-- Comment Modal -->
+<!-- Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -88,3 +89,8 @@
   </div>
 </div>
 
+<!-- jQuery (full version) -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<!-- Popper.js and Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
