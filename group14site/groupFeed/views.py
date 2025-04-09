@@ -134,3 +134,6 @@ def add_comment(request, recommendation_post_id):
             )
 
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
+
+def handle_vote(request):
+
