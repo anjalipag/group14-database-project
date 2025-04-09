@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.http import HttpResponse
 from django.db import connection
+from datetime import datetime
+
 def index(request):
     return HttpResponse("Hello, world. You're at the home index.")
 
@@ -43,6 +45,7 @@ def group_feed(request, group_id):
             'posted_by': row[9],
         }
 
+        # https://stackoverflow.com/questions/35918831/dict-setdefault-appends-one-extra-default-item-into-the-value-list
         post_by_category.setdefault(category_name, []).append(post_data)
 
     context = {
@@ -110,8 +113,23 @@ def group_detail(request, recommendation_post_id):
     context = {
         'recommendation_post_id': recommendation_post_id,
         'post': post_data,
-        'comments_for_post': all_comments
+        'comments_for_post': all_comments,
     }
 
     return render(request, 'group_detail.html', context)
 
+def add_comment(request, recommendation_post_id):
+    if request.method == "POST":
+        comment = request.POST.get("comment_text")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO Comment (comment_text, time_posted, user_id, recommendation_post_id)
+                VALUES (%s, %s, %s, %s)
+                """,
+                [comment, now, 1, recommendation_post_id]  # Replace user_id=1 when merge
+            )
+
+    return redirect('group_detail', recommendation_post_id=recommendation_post_id)
