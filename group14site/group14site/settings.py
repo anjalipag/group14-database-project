@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'saved',
     'groupFeed',
+    'createGroups'
 ]
 
 MIDDLEWARE = [
@@ -56,7 +57,7 @@ ROOT_URLCONF = 'group14site.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'saved', 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, "../templates"), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
