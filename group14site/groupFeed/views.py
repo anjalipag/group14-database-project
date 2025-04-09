@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.db import connection
 from datetime import datetime
 
+# chatGPT was used to understand how to use connection.cursor() and understand POST without model forms
 def index(request):
     return HttpResponse("Hello, world. You're at the home index.")
 
