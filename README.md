@@ -17,5 +17,5 @@ git clone https://github.com/anjalipag/group14-database-project.git
 
 # Run in terminal 
 python manage.py runserver
-Go to http://127.0.0.1:8000/ (local host) in browser
+<br> Go to http://127.0.0.1:8000/ (local host) in browser </br>
 
