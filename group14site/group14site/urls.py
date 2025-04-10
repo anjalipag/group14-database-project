@@ -25,6 +25,7 @@ urlpatterns = [
     path("group/saved/", include("savedGroups.urls")),
     path("saved/", include("saved.urls")),
     path("login/", include("login.urls")),
+    # path("/", views.add_comment, name="add_comment"),
     path("", views.index, name="index"),
     path('admin/', admin.site.urls),
 ]

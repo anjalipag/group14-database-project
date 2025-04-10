@@ -24,7 +24,7 @@
               {% endif %}
               <p class="text-muted mb-0">Admin: {{ group.admin_username }}</p>
             <div class="card-footer text-center">
-                        <a href="#" class="btn btn-primary">View Group</a>
+                        <a href="{% url 'group_feed' group.group_id %}" class="btn btn-primary">View Group</a>
                     </div>
             </div>
           </div>

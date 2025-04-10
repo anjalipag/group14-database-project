@@ -121,6 +121,7 @@ def group_detail(request, recommendation_post_id):
 
 def add_comment(request, recommendation_post_id):
     if request.method == "POST":
+        user_id = request.session.get('user_id')
         comment = request.POST.get("comment_text")
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -130,7 +131,7 @@ def add_comment(request, recommendation_post_id):
                 INSERT INTO Comment (comment_text, time_posted, user_id, recommendation_post_id)
                 VALUES (%s, %s, %s, %s)
                 """,
-                [comment, now, 1, recommendation_post_id]  # Replace user_id=1 when merge
+                [comment, now, user_id, recommendation_post_id]  # Replace user_id=1 when merge
             )
 
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)

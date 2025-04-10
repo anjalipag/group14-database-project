@@ -14,7 +14,8 @@ def index(request):
 
         if user:
             user_id = user[0]
-            return redirect(f"/group/saved/?user_id={user_id}")
+            request.session["user_id"] = user_id
+            return redirect(f"/group/saved/")
         else:
             error_message = "Invalid username or password."
 
