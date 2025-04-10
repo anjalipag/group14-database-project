@@ -2,10 +2,11 @@ from django.shortcuts import render
 from django.db import connection
 
 def browse_groups(request):
-    username= 'test1'
-    #username = request.user.username
+    #username= 'test1'
+    #username =  request.session.get('user_id')
 
-    user_id = get_user_id_by_username(username)
+    #user_id = get_user_id_by_username(username)
+    user_id = request.session.get('user_id')
     groups = get_groups_not_joined_by_user(user_id)
 
     return render(request, 'browse_groups.html', {'groups': groups})
