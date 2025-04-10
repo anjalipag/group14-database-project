@@ -36,13 +36,26 @@
         <div class="card shadow-sm p-4">
             <div class="card-body">
                 <h1 class="card-title"><strong>{{ rec.title }}</strong></h1>
+                <h6> <span class="badge rounded-pill text-bg-light border border-dark">{{ rec.group_name }}</span></h6>
                 <h5 class="card-subtitle mb-3 text-muted">@{{ rec.username }}</h5>
 
-                <p class="mb-4">
-                    <span class=" mr-4 badge rounded-pill text-bg-light border border-dark">{{ rec.group_name }}</span>
-                    <span class="badge rounded-pill text-bg-success" style = "border: 1px solid green;">{{ rec.up_vote_count }} ⇧</span>
-                    <span class="badge rounded-pill text-bg-danger" style = "border: 1px solid red;">{{ rec.down_vote_count }} ⇩</span>
-                </p>
+              <div class="mb-4 d-flex align-items-center gap-2 flex-wrap">
+                <form method="post" action="{% url 'upvote' rec_id=rec.recommendation_post_id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="badge rounded-pill bg-success text-light border-0 small px-3 py-1" style="cursor: pointer;">
+                        ⇧ {{ rec.up_vote_count }}
+                    </button>
+                </form>
+                <form method="post" action="{% url 'downvote' rec_id=rec.recommendation_post_id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="badge rounded-pill bg-danger text-light border-0 small px-3 py-1" style="cursor: pointer;">
+                        ⇩ {{ rec.down_vote_count }}
+                    </button>
+                </form>
+            </div>
+
+
+
 
                 <p class="card-text fst-italic">{{ rec.description }}</p>
                 <p style="color: gray;">{{ rec.time_stamp }}</p>
