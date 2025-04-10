@@ -14,16 +14,27 @@
 
       <div class="row text-center">
         <div class="col-md-3 mb-3">
-          <span class="badge badge-success p-2 w-100 ">Upvotes: {{ post.up_vote_count }}</span>
+        <form method = "post" class = "w-100" action ="{% url 'upvote' recommendation_post_id=post.post_id %}">
+            {% csrf_token %}
+          <button type = "submit" class = "badge rounded-pill badge-success p-2 w-100 border-0" style = "cursor:pointer;">
+            {{ post.up_vote_count }} ⇧
+          </button>
+        </form>
+      </div>
+
+        <div class="col-md-3 mb-3">
+          <form method = "post" class = "w-100" action ="{% url 'downvote' recommendation_post_id=post.post_id %}">
+            {% csrf_token %}
+          <button type = "submit" class = "badge rounded-pill badge-danger p-2 w-100 border-0" style = "cursor:pointer;">
+            {{ post.down_vote_count }} ⇩
+          </button>
+        </form>
         </div>
         <div class="col-md-3 mb-3">
-          <span class="badge badge-danger p-2 w-100">Downvotes: {{ post.down_vote_count }}</span>
+          <span class="badge rounded-pill badge-warning p-2 w-100">Rating: {{ post.overall_rating }}/5 </span>
         </div>
         <div class="col-md-3 mb-3">
-          <span class="badge badge-warning p-2 w-100">Rating: {{ post.overall_rating }}/5 </span>
-        </div>
-        <div class="col-md-3 mb-3">
-          <span class="badge badge-info p-2 w-100">Category: {{ post.category_name }}</span>
+          <span class="badge rounded-pill badge-info p-2 w-100">Category: {{ post.category_name }}</span>
         </div>
       </div>
 
