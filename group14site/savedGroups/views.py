@@ -1,8 +1,22 @@
 from django.shortcuts import render
+from django.db import connection
 
-# Create your views here.
-from django.http import HttpResponse
+def my_groups(request):
+    # user_id = request.GET.get('user_id')
+    user_id = request.session.get('user_id')
+    groups = get_groups_joined_by_user(user_id)
+    return render(request, 'my_groups.html', {'groups': groups})
 
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the saved groups index.")
+def get_groups_joined_by_user(user_id):
+    with connection.cursor() as c:
+        c.execute("""
+            SELECT g.group_id, g.group_name, g.group_photo,
+                   u.username AS admin_username
+            FROM groups g
+            JOIN users u ON g.admin_id = u.user_id
+            WHERE g.group_id IN (
+                SELECT group_id FROM groupsmembers WHERE user_id = %s
+            )
+        """, [user_id])
+        cols = [col[0] for col in c.description]
+        return [dict(zip(cols, row)) for row in c.fetchall()]

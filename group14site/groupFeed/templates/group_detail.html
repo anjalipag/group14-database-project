@@ -1,0 +1,109 @@
+
+<!-- ChatGPT was used to style this page to make it look asthetic -->
+{% load static %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<div class="container my-5">
+
+  <!-- Post Detail -->
+  <div class="card mb-5 shadow-lg">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">{{ post.title }}</h2>
+    </div>
+    <div class="card-body">
+      <p class="mb-3"><strong>Description:</strong> {{ post.description }}</p>
+
+      <div class="row text-center">
+        <div class="col-md-3 mb-3">
+        <form method = "post" class = "w-100" action ="{% url 'upvote' recommendation_post_id=post.post_id %}">
+            {% csrf_token %}
+          <button type = "submit" class = "badge rounded-pill badge-success p-2 w-100 border-0" style = "cursor:pointer;">
+            {{ post.up_vote_count }} ⇧
+          </button>
+        </form>
+      </div>
+
+        <div class="col-md-3 mb-3">
+          <form method = "post" class = "w-100" action ="{% url 'downvote' recommendation_post_id=post.post_id %}">
+            {% csrf_token %}
+          <button type = "submit" class = "badge rounded-pill badge-danger p-2 w-100 border-0" style = "cursor:pointer;">
+            {{ post.down_vote_count }} ⇩
+          </button>
+        </form>
+        </div>
+        <div class="col-md-3 mb-3">
+          <span class="badge rounded-pill badge-warning p-2 w-100">Rating: {{ post.overall_rating }}/5 </span>
+        </div>
+        <div class="col-md-3 mb-3">
+          <span class="badge rounded-pill badge-info p-2 w-100">Category: {{ post.category_name }}</span>
+        </div>
+      </div>
+
+      <p class="text-muted mb-0">
+        Posted by <strong>{{ post.posted_by }}</strong> on {{ post.time_stamp }}
+      </p>
+
+      <div class="mt-4 mb-3 d-flex">
+        <a href="" class="btn btn-outline-primary mr-2" data-toggle="modal" data-target="#commentModal">Add Comment</a>
+        {% if post.extra_info %}
+          <a href="{{ post.extra_info }}" class="btn btn-info" target="_blank">Learn More</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">
+      <h4 class="mb-0">Comments</h4>
+    </div>
+    <div class="card-body">
+      {% if comments_for_post %}
+        {% for comment in comments_for_post %}
+          <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between">
+              <strong>@{{ comment.posted_by }}</strong>
+              <small class="text-muted">{{ comment.time_posted }}</small>
+            </div>
+            <p class="mt-2 mb-0">{{ comment.comment_text }}</p>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No comments yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Comment Modal: ChatGPT was used to create this popup box instead of having a different view for adding a comment -->
+<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form method="post" action="{% url 'add_comment' recommendation_post_id=post.post_id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="commentModalLabel">Add a Comment</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="commentText">Your Comment</label>
+            <textarea class="form-control" id="commentText" name="comment_text" rows="4" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- jQuery (full version) -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<!-- Popper.js and Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
