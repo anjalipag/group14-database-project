@@ -12,10 +12,10 @@
 pip install django
 
 ## Clone the repo
-git clone https://github.com/anjalipag/group14-database-project.git\
-cd project14site
+git clone https://github.com/anjalipag/group14-database-project.git
+<br> cd project14site </br>
 
 # Run in terminal 
-python manage.py runserver\
+python manage.py runserver
 Go to http://127.0.0.1:8000/ (local host) in browser
 
