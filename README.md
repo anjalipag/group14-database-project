@@ -13,7 +13,7 @@ pip install django
 
 ## Clone the repo
 git clone https://github.com/anjalipag/group14-database-project.git
-<br> cd project14site </br>
+<br> cd group14site </br>
 
 # Run in terminal 
 python manage.py runserver
