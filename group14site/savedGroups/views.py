@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.db import connection
 
 def my_groups(request):
-    user_id = '4'
+    user_id = request.GET.get('user_id')
 
     groups = get_groups_joined_by_user(user_id)
     return render(request, 'my_groups.html', {'groups': groups})
