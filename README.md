@@ -6,12 +6,12 @@
 # Natalie Yee (nvn5yn)
 
 
-## Instructions
+# Instructions
 
-# Install django
+## Install django
 pip install django
 
-# Clone the repo
+## Clone the repo
 git clone https://github.com/anjalipag/group14-database-project.git
 cd project14site
 
