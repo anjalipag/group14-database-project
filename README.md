@@ -16,8 +16,9 @@ git clone https://github.com/anjalipag/group14-database-project.git
 <br> cd group14site </br>
 
 ## Add the .env file to Root Directory
+<br> Add the .env file to the root directory and rename the file to be '.env' </br>
+<br> make sure the file structure looks like this: \group14-database-project\group14site\group14site\.env </br>
 pip install python-environ
-<br> Add the .env file to the root directory </br>
 
 # Run in terminal 
 python manage.py runserver OR python3 manage.py runserver depending on which python version you have
