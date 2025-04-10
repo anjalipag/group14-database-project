@@ -13,4 +13,4 @@
 4) We have yet to attach all the screens together so to navigate to working pages here are working urls
 
  http://127.0.0.1:8000/saved
- http://127.0.0.1:8000/saved/details/1   
+ http://127.0.0.1:8000/saved/details/1

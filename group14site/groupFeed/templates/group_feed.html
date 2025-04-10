@@ -4,7 +4,30 @@
 {% load static %}
 
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="/group/saved">My Groups</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/saved">Saved Recommendations</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/group/browse">Browse Groups</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/group/create">Create Group</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
 <div class="container my-5">
   {% for category, posts in category_posts.items %}
     <div class="card mb-5 shadow-sm">

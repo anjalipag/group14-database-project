@@ -3,6 +3,8 @@ from django.db import connection
 
 
 def index(request):
+    if 'user_id' in request.session:
+        del request.session['user_id']
     error_message = ""
     success_message = ""
 
