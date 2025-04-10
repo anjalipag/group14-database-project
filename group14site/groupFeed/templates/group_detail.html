@@ -61,7 +61,7 @@
         {% for comment in comments_for_post %}
           <div class="border rounded p-3 mb-3">
             <div class="d-flex justify-content-between">
-              <strong>{{ comment.posted_by }}</strong>
+              <strong>@{{ comment.posted_by }}</strong>
               <small class="text-muted">{{ comment.time_posted }}</small>
             </div>
             <p class="mt-2 mb-0">{{ comment.comment_text }}</p>
