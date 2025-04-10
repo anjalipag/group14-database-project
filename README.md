@@ -10,7 +10,7 @@
 
 ## Install django and dependencies
 pip install django
-<br> pip install django-bootstrap5 </br>
+<br> pip install django-bootstrap5 
 <br> pip install psycopg2 </br>
 
 ## Clone the repo
