@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.db import connection
 
 def index(request):
-   saved_recs = get_saved_recs()
+   saved_recs = get_saved_recs(request)
    context = {
       'saved_recs': saved_recs,
    }
@@ -14,9 +14,10 @@ def see_recommendation_details(request, rec_id):
    return render(request, 'saved_rec_details.html', {'rec': details, 'comments': comments})
 
 #NOTE: right now I cannot filter saved recs to a specific user id because I can't login and save user id state
-def get_saved_recs():
+def get_saved_recs(request):
+   user_id = request.session.get('user_id')
    with connection.cursor() as c:
-      c.execute("SELECT * FROM savedrecommendations JOIN users ON user_posted_id = user_id NATURAL JOIN recommendationpost NATURAL JOIN recommendeditem NATURAL JOIN groups")
+      c.execute("SELECT * FROM savedrecommendations JOIN users ON user_posted_id = user_id NATURAL JOIN recommendationpost NATURAL JOIN recommendeditem NATURAL JOIN groups WHERE user_saved_id = %s", [user_id])
       cols = [col[0] for col in c.description]
       saved_recs =  [dict(zip(cols, row)) for row in c.fetchall()]
    return saved_recs
@@ -44,19 +45,20 @@ def get_comments(rec_id):
 
 ##MODIFY LATER: change to user id (not hardcoded)
 def handle_upvote(request, rec_id):
+    user_id = request.session.get('user_id')
     with connection.cursor() as c:
         #This is to see how the user has/has not voted
-        c.execute("""SELECT vote_type FROM voting WHERE user_id = %s AND recommendation_post = %s""", [1, rec_id])
+        c.execute("""SELECT vote_type FROM voting WHERE user_id = %s AND recommendation_post = %s""", [user_id, rec_id])
         row = c.fetchone()
 
         #If the user has never voted, they can add a vote
         if row is None:
-            c.execute("""INSERT INTO voting(user_id,recommendation_post, vote_type) VALUES(%s, %s, 'Upvoted')""", [1, rec_id])
+            c.execute("""INSERT INTO voting(user_id,recommendation_post, vote_type) VALUES(%s, %s, 'Upvoted')""", [user_id, rec_id])
             c.execute("""UPDATE RecommendationPost SET up_vote_count = up_vote_count + 1 WHERE recommendation_post_id = %s""", [rec_id])
 
         #If they've downvoted before, change their vote
         elif row[0] == 'Downvoted':
-            c.execute("""UPDATE voting SET vote_type = 'Upvoted' WHERE user_id = %s AND recommendation_post = %s""", [1, rec_id])
+            c.execute("""UPDATE voting SET vote_type = 'Upvoted' WHERE user_id = %s AND recommendation_post = %s""", [user_id, rec_id])
 
             c.execute("""UPDATE RecommendationPost SET up_vote_count = up_vote_count + 1, down_vote_count = down_vote_count - 1 WHERE recommendation_post_id = %s""", [rec_id])
 
@@ -71,13 +73,13 @@ def handle_downvote(request, rec_id):
     with connection.cursor() as c:
         # This is to see how the user has/has not voted
         c.execute("""SELECT vote_type FROM voting WHERE user_id = %s AND recommendation_post = %s""",
-                  [1, rec_id])
+                  [user_id, rec_id])
         row = c.fetchone()
 
         # If the user has never voted, they can add a vote
         if row is None:
             c.execute("""INSERT INTO voting(user_id,recommendation_post, vote_type) VALUES(%s, %s, 'Downvoted')""",
-                      [1, rec_id])
+                      [user_id, rec_id])
             c.execute(
                 """UPDATE RecommendationPost SET down_vote_count = down_vote_count + 1 WHERE recommendation_post_id = %s""",
                 [rec_id])
@@ -85,7 +87,7 @@ def handle_downvote(request, rec_id):
         # If they've upvoted before, change their vote
         elif row[0] == 'Upvoted':
             c.execute("""UPDATE voting SET vote_type = 'Downvoted' WHERE user_id = %s AND recommendation_post = %s""",
-                      [1, rec_id])
+                      [user_id, rec_id])
 
             c.execute(
                 """UPDATE RecommendationPost SET down_vote_count = down_vote_count + 1, up_vote_count = up_vote_count - 1 WHERE recommendation_post_id = %s""",
