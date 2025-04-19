@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Special+Gothic+Expanded+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Special+Gothic+Expanded+One&display=swap" rel="stylesheet">
 
 
     <script>
@@ -34,29 +34,29 @@
 <body>
 
     <div class="container">
-        <h2 class="mb-4 poppins-bold">Welcome to <span class="app-title">TuneIn!</span></h2>
+        <h2 class="mb-4 new-font">Welcome to <span class="text-primary">TuneIn!</span></h2>
 
         <div class="justify-content-center mt-3">
-            <a href="/login/" class="btn mx-2 px-4 py-2 rounded-pill">Login</a>
+            <a href="/login/" class="btn white-btn mx-2 px-4 py-2 rounded-pill">Login</a>
             </br>
-            <button class="btn btn-success mx-2 my-2 px-4 py-2 rounded-pill" onclick="toggleSignupForm()">Sign Up</button>
+            <button class="btn white-btn mx-2 my-2 px-4 py-2 rounded-pill" onclick="toggleSignupForm()">Sign Up</button>
         </div>
 
         <div id="signupForm">
-            <h3 class="poppins-bold">Sign Up</h3>
+            <h3 >Sign Up</h3>
             <form method="POST">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label class="form-label poppins-semibold">Username</label>
+                    <label class="form-label ">Username</label>
                     <input type="text" placeholder="Username" class="form-control" name="username" required>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label poppins-semibold">Password</label>
+                    <label class="form-label ">Password</label>
                     <input type="password" placeholder="Password" class="form-control" name="password" required>
                 </div>
 
-                <button type="submit" class="btn rounded-pill card-btn w-100" name="signup">Sign Up</button>
+                <button type="submit" class="btn rounded-pill white-btn w-100" name="signup">Sign Up</button>
             </form>
 
             {% if error_message %}
