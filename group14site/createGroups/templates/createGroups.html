@@ -2,11 +2,19 @@
 <html lang="en">
 <head>
     <!-- SOURCES USED: ChatGPT to generate forms UI and styling -->
+     {% load static %}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Create Groups Page</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+ <link href="{% static 'css/base.css' %}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Special+Gothic+Expanded+One&display=swap" rel="stylesheet">
+
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -36,26 +44,26 @@
 
 
 <div class="container-xl mt-5">
-    <h1 class="mb-4"><strong>Create Group</strong></h1>
+    <h1 class="mb-4">Create Group</h1>
     <form action="{% url 'groupCreatedSuccess' %}" method="post" class="bg-light p-4 rounded shadow-sm">
         {% csrf_token %}
 
         <div class="mb-3">
-            <label for="groupName" class="form-label"><strong>Group Name</strong></label>
-            <input type="text" class="form-control" id="groupName" name="group_name" placeholder="Enter group name" required>
+            <label for="groupName" class="form-label">Group Name</label>
+            <input type="text" class="form-control poppins-regular" id="groupName" name="group_name" placeholder="Enter group name" required>
         </div>
 
         <div class="mb-3">
-            <label for="groupDescription" class="form-label"><strong>Group Description</strong></label>
-            <textarea class="form-control" id="groupDescription" name="group_description" rows="4" placeholder="Write a short description..." required></textarea>
+            <label for="groupDescription" class="form-label">Group Description</label>
+            <textarea class="form-control poppins-regular" id="groupDescription" name="group_description" rows="4" placeholder="Write a short description..." required></textarea>
         </div>
 
         <div class="mb-3">
-            <label for="groupPhoto" class="form-label"><strong>Group Photo</strong></label>
-            <input class="form-control" type="file" id="groupPhoto" name="group_photo" accept="image/*">
+            <label for="groupPhoto" class="form-label">Group Photo</label>
+            <input class="form-control poppins-regular" type="file" id="groupPhoto" name="group_photo" accept="image/*">
         </div>
 
-        <button type="submit" class="btn btn-success w-100">Create Group</button>
+        <button type="submit" class="btn btn-primary w-100">Create Group</button>
     </form>
 </div>
 </body>

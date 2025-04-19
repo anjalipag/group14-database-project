@@ -8,13 +8,13 @@
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <title>Saved Recommendations Page</title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"  integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"  crossorigin="anonymous">
-           <link href="{% static 'css/saved.css' %}" rel="stylesheet">
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Special+Gothic+Expanded+One&display=swap" rel="stylesheet">
-    </head>
+    <link href="{% static 'css/base.css' %}" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Special+Gothic+Expanded+One&display=swap" rel="stylesheet">
+</head>
     <body>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,18 +42,18 @@
         </nav>
 
        <div class = "container-xl">
-        <h1 class = "mt-4 mb-4"><strong>Saved Recommendations <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-bookmark-check-fill" viewBox="0 0 16 16">
+        <h1 class = "mt-4 mb-4">Saved Recommendations <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-bookmark-check-fill" viewBox="0 0 16 16">
           <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5m8.854-9.646a.5.5 0 0 0-.708-.708L7.5 7.793 6.354 6.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z"/>
-        </svg></strong></h1>
+        </svg></h1>
            <div class="row">
             {% for rec in saved_recs %}
                 <div class="col-12 col-sm-6 col-md-3 mb-4">
                     <div class="card shadow-sm h-100">
                         <div class="card-body">
-                            <h5 class="card-title"><strong>{{ rec.title }}</strong></h5>
+                            <h5 class="card-title">{{ rec.title }}</h5>
                              <p class="card-text">@{{ rec.username }}</p>
-                            <p><span class="badge rounded-pill text-bg-light" style = "border: 1px solid black;">{{ rec.group_name }}</span></p>
-                            <a href="{% url 'saved_rec_details' rec.recommendation_id %}" class="btn btn-secondary mt-2 mb-2">See Recommendation</a>
+                            <p><span class="badge rounded-pill text-bg-light poppins-bold" style = "border: 1px solid black;">{{ rec.group_name }}</span></p>
+                            <a href="{% url 'saved_rec_details' rec.recommendation_id %}" class="btn  btn-primary mt-2 mb-2">See Recommendation</a>
                         </div>
                     </div>
                 </div>
