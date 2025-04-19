@@ -22,7 +22,7 @@ body{
 .white-btn:hover, .white-btn:active, .white-btn:focus{
     background-color: #e8e7e7;
      border: 2px solid black;
-    color:#091511;
+    color:black;
 }
 
  .container {
