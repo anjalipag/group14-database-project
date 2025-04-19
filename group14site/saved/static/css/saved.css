@@ -6,43 +6,6 @@ body{
     color:#DCF1DC;
 
 }
-
-.card{
-    background-color: #DCF1DC;
-}
-
-.card-btn:hover {
-    background-color: #a4d267;
-}
-
-
-input.form-control {
-    background-color: white;
-    color: #091511;
-    border-color: #091511;
-}
-
-.card-btn{
-    background-color: #B2E470;
-    border: 1px solid #B2E470;
-}
-
-.card-btn:hover, .card-btn:active, .card-btn:focus{
-  background-color: #a4d267;
-    border: 1px solid #a4d267;
-}
-
-.btn{
-    background-color: #091511;
-    border: 1px solid #B2E470;
-    color:#DCF1DC;
-}
-
-.btn:hover, .btn:active, .btn:focus{
-    background-color: #B2E470;
-    color:#091511;
-}
-
 .poppins-thin {
   font-family: "Poppins", sans-serif;
   font-weight: 100;

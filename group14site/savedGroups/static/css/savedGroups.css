@@ -1,47 +1,38 @@
 body{
-    background-color:#091511;
      font-family: "Poppins", sans-serif;
   font-weight: 400;
   font-style: normal;
-    color:#DCF1DC;
+    color:#091511;
 
+}
+.navbar{
+    background-color: #091511;
+    color:#B2E470;
+}
+
+.nav-link, .navbar-brand{
+    color: #B2E470;
+}
+
+.nav-link:hover, .navbar-brand:hover{
+    color: #8bb456;
 }
 
 .card{
-    background-color: #DCF1DC;
-}
-
-.card-btn:hover {
-    background-color: #a4d267;
-}
-
-
-input.form-control {
-    background-color: white;
-    color: #091511;
-    border-color: #091511;
-}
-
-.card-btn{
-    background-color: #B2E470;
-    border: 1px solid #B2E470;
-}
-
-.card-btn:hover, .card-btn:active, .card-btn:focus{
-  background-color: #a4d267;
-    border: 1px solid #a4d267;
+    background-color: #f6ffeb;
 }
 
 .btn{
-    background-color: #091511;
-    border: 1px solid #B2E470;
-    color:#DCF1DC;
-}
-
-.btn:hover, .btn:active, .btn:focus{
     background-color: #B2E470;
+    border: 1px solid #B2E470;
     color:#091511;
 }
+
+.btn:hover{
+    background-color: #8bb456;
+}
+
+
 
 .poppins-thin {
   font-family: "Poppins", sans-serif;
