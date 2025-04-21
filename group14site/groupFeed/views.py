@@ -12,6 +12,11 @@ def index(request):
 def group_feed(request, group_id):
     post_by_category ={}
     with connection.cursor() as cursor:
+        #get admin id for later to check if someone has admin permissions
+        cursor.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
+        admin_id = cursor.fetchone()[0]
+
+
         cursor.execute("""
         SELECT
             c.category_name,
@@ -52,6 +57,8 @@ def group_feed(request, group_id):
     context = {
         'group_id': group_id,
         'category_posts': post_by_category,
+        'admin_id': admin_id,
+        'user_id':request.session.get('user_id'),
     }
 
     return render(request, 'group_feed.html', context)
@@ -191,3 +198,22 @@ def handle_downvote(request, recommendation_post_id):
 
     # Reload page
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
+
+def delete_post(request, post_id):
+    if request.method == "POST":
+        uid = request.session.get("user_id")
+        with connection.cursor() as c:
+            c.execute("""SELECT g.group_id, g.admin_id FROM Groups g JOIN RecommendationPost rp ON g.groups_id = rp.group_id
+            WHERE rp.recommendation_post_id = %s""", [post_id])
+            result = c.fetchone()
+
+            #make sure the user is the admin of the group
+            if result:
+                group_id, admin_id = result
+                if uid == admin_id:
+                    c.execute("DELETE FROM RecommendationPost WHERE recommendation_post_id = %s", [post_id])
+                return redirect(reverse('group_feed'), args[group_id])
+
+    return redirect('/')
+
+    return redirect('group_feed.html', recommendation_post_id=recommendation_post_id)

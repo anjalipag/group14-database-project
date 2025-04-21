@@ -17,6 +17,30 @@ body{
     color:black;
 }
 
+.btn-red{
+    background-color: white;
+    border: 2px solid red;
+    color:red;
+}
+
+.btn-red:hover, .btn-red:active, .btn-red:focus{
+    background-color: #e8e7e7;
+     border: 2px solid red;
+    color:red;
+}
+
+.btn-green{
+    background-color: white;
+    border: 2px solid green;
+    color:green;
+}
+
+.btn-green:hover, .btn-green:active, .btn-green:focus{
+    background-color: #e8e7e7;
+     border: 2px solid green;
+    color:green;
+}
+
 .reg-text {
 
 }

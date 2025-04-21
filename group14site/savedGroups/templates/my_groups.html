@@ -54,7 +54,9 @@
                   {% if group.description %}
                     <p class="card-text">{{ group.description }}</p>
                   {% endif %}
-                    <a href="{% url 'group_feed' group.group_id %}" class="btn btn-primary">View Group</a>
+                    <a href="{% url 'group_feed' group.group_id %}" class="btn btn-primary mb-2">View Group</a>
+                  </br>
+                   <a href="{% url 'admin_view' group.group_id %}" class="btn btn-info" >Manage Members/Requests</a>
                 </div>
               </div>
             </div>
