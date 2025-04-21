@@ -49,12 +49,69 @@ def group_feed(request, group_id):
         # https://stackoverflow.com/questions/35918831/dict-setdefault-appends-one-extra-default-item-into-the-value-list
         post_by_category.setdefault(category_name, []).append(post_data)
 
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT c.category_name FROM Category c
+            """
+        )
+        category_names = cursor.fetchall()
+
     context = {
         'group_id': group_id,
         'category_posts': post_by_category,
+        'category_names': category_names,
     }
 
+
+
     return render(request, 'group_feed.html', context)
+
+from django.shortcuts import redirect
+from django.db import connection
+from datetime import datetime
+
+def add_recommendation(request, group_id):
+    if request.method == "POST":
+        user_id = request.session.get('user_id')
+        category_name = request.POST.get('category_name')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        overall_rating = request.POST.get('overall_rating')
+        extra_info = request.POST.get('extra_info')
+        time_stamp = datetime.now()
+        up_vote_count = 0
+        down_vote_count = 0
+
+        # Get category_id from category_name
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT category_id FROM Category WHERE category_name = %s",
+                [category_name]
+            )
+            row = cursor.fetchone()
+            category_id = row[0]
+
+        # Insert into RecommendedItem
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO RecommendedItem (title, category_id) VALUES (%s, %s) RETURNING recommended_item_id",
+                [title, category_id]
+            )
+            recommended_item_id= cursor.fetchone()[0]
+
+        # Insert into RecommendationPost
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO RecommendationPost
+                (user_id, group_id, recommended_item_id, description, up_vote_count, down_vote_count, overall_rating, extra_info, time_stamp)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                [user_id, group_id, recommended_item_id, description, up_vote_count, down_vote_count, overall_rating, extra_info, time_stamp]
+            )
+
+    return redirect('group_feed', group_id=group_id)
 
 def group_detail(request, recommendation_post_id):
     with connection.cursor() as cursor:
