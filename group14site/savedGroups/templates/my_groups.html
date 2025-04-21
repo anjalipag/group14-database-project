@@ -39,32 +39,70 @@
             </ul>
           </div>
         </nav>
-  <div class="container mt-5">
-    <h2 class="mb-4">My Groups</h2>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-      {% for group in groups %}
-        <div class="col">
-          <div class="card h-100">
-            {% if group.photo_url %}
-              <img src="{{ group.photo_url }}" class="card-img-top" alt="{{ group.group_name }}">
-            {% else %}
-              <img src="https://via.placeholder.com/400x200.png?text=No+Image" class="card-img-top" alt="No image">
-            {% endif %}
-            <div class="card-body">
-              <h5 class="card-title">{{ group.group_name }}</h5>
-              {% if group.description %}
-                <p class="card-text">{{ group.description }}</p>
-              {% endif %}
-              <p class="text-muted mb-0 poppins-regular">Admin: {{ group.admin_username }}</p>
-            <div class="card-footer text-center">
-                        <a href="{% url 'group_feed' group.group_id %}" class="btn btn-primary">View Group</a>
-                    </div>
+
+  <div class="d-flex flex-column vh-100">
+    <!-- Top Half: Created Groups -->
+    <div class="flex-fill overflow-auto border-bottom">
+      <div class="container mt-4">
+        <h2 class="mb-3">Groups I’ve Created</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+          {% for group in created_groups %}
+            <div class="col">
+              <div class="card h-100">
+                {% if group.photo_url %}
+                  <img src="{{ group.photo_url }}" class="card-img-top" alt="{{ group.group_name }}">
+                {% else %}
+                  <img src="https://via.placeholder.com/400x200.png?text=No+Image" class="card-img-top" alt="No image">
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title">{{ group.group_name }}</h5>
+                  {% if group.description %}
+                    <p class="card-text">{{ group.description }}</p>
+                  {% endif %}
+                  <p class="text-muted mb-0 poppins-regular">Admin: {{ group.admin_username }}</p>
+                  <div class="card-footer text-center">
+                    <a href="{% url 'group_feed' group.group_id %}" class="btn btn-primary">View Group</a>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          {% empty %}
+            <p>You haven't created any groups yet.</p>
+          {% endfor %}
         </div>
-      {% empty %}
-        <p>You haven't joined any groups yet.</p>
-      {% endfor %}
+      </div>
+    </div>
+
+    <!-- Bottom Half: Joined Groups -->
+    <div class="flex-fill overflow-auto">
+      <div class="container mt-4">
+        <h2 class="mb-3">Groups I’ve Joined</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+          {% for group in groups %}
+            <div class="col">
+              <div class="card h-100">
+                {% if group.photo_url %}
+                  <img src="{{ group.photo_url }}" class="card-img-top" alt="{{ group.group_name }}">
+                {% else %}
+                  <img src="https://via.placeholder.com/400x200.png?text=No+Image" class="card-img-top" alt="No image">
+                {% endif %}
+                <div class="card-body">
+                  <h5 class="card-title">{{ group.group_name }}</h5>
+                  {% if group.description %}
+                    <p class="card-text">{{ group.description }}</p>
+                  {% endif %}
+                  <p class="text-muted mb-0 poppins-regular">Admin: {{ group.admin_username }}</p>
+                  <div class="card-footer text-center">
+                    <a href="{% url 'group_feed' group.group_id %}" class="btn btn-primary">View Group</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <p>You haven't joined any groups yet.</p>
+          {% endfor %}
+        </div>
+      </div>
     </div>
   </div>
 </body>
