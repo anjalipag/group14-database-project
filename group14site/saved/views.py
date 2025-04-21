@@ -1,5 +1,8 @@
 from django.shortcuts import render,redirect
 from django.db import connection
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
+import requests
 
 def index(request):
    saved_recs = get_saved_recs(request)
@@ -94,3 +97,11 @@ def handle_downvote(request, rec_id):
 
     # Reload page
     return redirect('saved_rec_details', rec_id=rec_id)
+
+def omdb_api(request):
+    url = f'http://www.omdbapi.com/?apikey={settings.OMDB_KEY}&t=The+Office'
+    response = requests.get(url)
+    if response.status_code ==200:
+        data=response.json()
+        return JsonResponse(data)
+    return HttpResponse('Failed')
