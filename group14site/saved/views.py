@@ -8,11 +8,6 @@ def index(request):
    }
    return render(request, 'saved_recs.html', context)
 
-def see_recommendation_details(request, rec_id):
-   details = get_rec_details(rec_id)
-   comments = get_comments(rec_id)
-   return render(request, 'saved_rec_details.html', {'rec': details, 'comments': comments})
-
 #NOTE: right now I cannot filter saved recs to a specific user id because I can't login and save user id state
 def get_saved_recs(request):
    user_id = request.session.get('user_id')
