@@ -53,7 +53,7 @@
                             <h5 class="card-title">{{ rec.title }}</h5>
                              <p class="card-text">@{{ rec.username }}</p>
                             <p><span class="badge rounded-pill text-bg-light poppins-bold" style = "border: 1px solid black;">{{ rec.group_name }}</span></p>
-                            <a href="{% url 'saved_rec_details' rec.recommendation_id %}" class="btn  btn-primary mt-2 mb-2">See Recommendation</a>
+                            <a href="{% url 'group_detail' rec.recommendation_post_id %}" class="btn  btn-primary mt-2 mb-2">See Recommendation</a>
                         </div>
                     </div>
                 </div>
