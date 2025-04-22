@@ -4,12 +4,20 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import connection
 from datetime import datetime
+from django.urls import reverse
 
 # chatGPT was used to understand how to use connection.cursor() and understand POST without model forms
 def index(request):
     return HttpResponse("Hello, world. You're at the home index.")
 
+def get_total_post_count(group_id):
+    with connection.cursor() as c:
+        c.execute("""SELECT COUNT(*) FROM RecommendationPost WHERE group_id = %s""", [group_id])
+        count = c.fetchone()[0]
+    return count
+
 def group_feed(request, group_id):
+    total_post_count = get_total_post_count(group_id)
     post_by_category ={}
     with connection.cursor() as cursor:
         #get admin id for later to check if someone has admin permissions
@@ -56,6 +64,7 @@ def group_feed(request, group_id):
 
     context = {
         'group_id': group_id,
+        'total_posts': total_post_count,
         'category_posts': post_by_category,
         'admin_id': admin_id,
         'user_id':request.session.get('user_id'),
