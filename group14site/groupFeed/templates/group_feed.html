@@ -102,6 +102,15 @@
 
         <div class="modal-body">
           <div class="form-group">
+           <label for="category_name">Category Name</label>
+            <select class="form-control" id="category_name" name="category_name" required>
+              {% for category in category_names %}
+                <option value="{{ category.0 }}">{{ category.0 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
             <label for="title">Title</label>
             <input type="text" class="form-control" id="title" name="title" autocomplete="off" required>
             <div id="title-suggestions" class="list-group mt-1"></div>
@@ -111,15 +120,6 @@
           <div class="form-group">
             <label for="description">Description</label>
             <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
-          </div>
-
-          <div class="form-group">
-           <label for="category_name">Category Name</label>
-            <select class="form-control" id="category_name" name="category_name" required>
-              {% for category in category_names %}
-                <option value="{{ category.0 }}">{{ category.0 }}</option>
-              {% endfor %}
-            </select>
           </div>
 
           <div class="form-group">
