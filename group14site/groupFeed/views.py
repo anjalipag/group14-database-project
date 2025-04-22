@@ -4,6 +4,9 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import connection
 from datetime import datetime
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # chatGPT was used to understand how to use connection.cursor() and understand POST without model forms
 def index(request):
@@ -66,10 +69,6 @@ def group_feed(request, group_id):
 
 
     return render(request, 'group_feed.html', context)
-
-from django.shortcuts import redirect
-from django.db import connection
-from datetime import datetime
 
 def add_recommendation(request, group_id):
     if request.method == "POST":
@@ -195,19 +194,20 @@ def add_comment(request, recommendation_post_id):
 
 ##MODIFY LATER: change to user id (not hardcoded)
 def handle_upvote(request, recommendation_post_id):
+    uid = request.session.get('user_id')
     with connection.cursor() as c:
         #This is to see how the user has/has not voted
-        c.execute("""SELECT vote_type FROM voting WHERE user_id = %s AND recommendation_post = %s""", [1, recommendation_post_id])
+        c.execute("""SELECT vote_type FROM voting WHERE user_id = %s AND recommendation_post = %s""", [uid, recommendation_post_id])
         row = c.fetchone()
 
         #If the user has never voted, they can add a vote
         if row is None:
-            c.execute("""INSERT INTO voting(user_id,recommendation_post, vote_type) VALUES(%s, %s, 'Upvoted')""", [1, recommendation_post_id])
+            c.execute("""INSERT INTO voting(user_id,recommendation_post, vote_type) VALUES(%s, %s, 'Upvoted')""", [uid, recommendation_post_id])
             c.execute("""UPDATE RecommendationPost SET up_vote_count = up_vote_count + 1 WHERE recommendation_post_id = %s""", [recommendation_post_id])
 
         #If they've downvoted before, change their vote
         elif row[0] == 'Downvoted':
-            c.execute("""UPDATE voting SET vote_type = 'Upvoted' WHERE user_id = %s AND recommendation_post = %s""", [1, recommendation_post_id])
+            c.execute("""UPDATE voting SET vote_type = 'Upvoted' WHERE user_id = %s AND recommendation_post = %s""", [uid, recommendation_post_id])
 
             c.execute("""UPDATE RecommendationPost SET up_vote_count = up_vote_count + 1, down_vote_count = down_vote_count - 1 WHERE recommendation_post_id = %s""", [recommendation_post_id])
 
@@ -219,16 +219,17 @@ def handle_upvote(request, recommendation_post_id):
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
 
 def handle_downvote(request, recommendation_post_id):
+    uid = request.session.get('user_id')
     with connection.cursor() as c:
         # This is to see how the user has/has not voted
         c.execute("""SELECT vote_type FROM voting WHERE user_id = %s AND recommendation_post = %s""",
-                  [1, recommendation_post_id])
+                  [uid, recommendation_post_id])
         row = c.fetchone()
 
         # If the user has never voted, they can add a vote
         if row is None:
             c.execute("""INSERT INTO voting(user_id,recommendation_post, vote_type) VALUES(%s, %s, 'Downvoted')""",
-                      [1, recommendation_post_id])
+                      [uid, recommendation_post_id])
             c.execute(
                 """UPDATE RecommendationPost SET down_vote_count = down_vote_count + 1 WHERE recommendation_post_id = %s""",
                 [recommendation_post_id])
@@ -236,7 +237,7 @@ def handle_downvote(request, recommendation_post_id):
         # If they've upvoted before, change their vote
         elif row[0] == 'Upvoted':
             c.execute("""UPDATE voting SET vote_type = 'Downvoted' WHERE user_id = %s AND recommendation_post = %s""",
-                      [1, recommendation_post_id])
+                      [uid, recommendation_post_id])
 
             c.execute(
                 """UPDATE RecommendationPost SET down_vote_count = down_vote_count + 1, up_vote_count = up_vote_count - 1 WHERE recommendation_post_id = %s""",
@@ -248,9 +249,7 @@ def handle_downvote(request, recommendation_post_id):
 
     # Reload page
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
-import requests
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+
 
 @csrf_exempt
 def search_deezer(request):
