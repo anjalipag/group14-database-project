@@ -54,7 +54,7 @@
                 <th scope="col">Rating</th>
                 <th schope="col">Posted By</th>
                 <th scope="col">Posted At</th>
-                <th scope="col">View More</th>
+                <th scope="col">Discover & Save</th>
               </tr>
             </thead>
             <tbody class="poppins-regular">
@@ -65,9 +65,16 @@
                   <td>{{ post.overall_rating }}</td>
                   <td>{{ post.posted_by }}</td>
                   <td>{{ post.time_stamp }}</td>
-                  <td>
-                    <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary">Learn More</a>
-                  </td>
+                  <td class="d-flex gap-2">
+  <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary mr-2">
+    Learn More
+  </a>
+<form action="{% url 'save_recc' post.post_id post.posted_by_id group_id %}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-sm btn-success">Save</button>
+</form>
+
+</td>
                 </tr>
               {% endfor %}
             </tbody>

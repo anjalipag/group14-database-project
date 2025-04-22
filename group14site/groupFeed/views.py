@@ -23,7 +23,8 @@ def group_feed(request, group_id):
             rp.extra_info,
             rp.time_stamp,
             ri.title,
-            u.username
+            u.username,
+            rp.user_id
         FROM RecommendationPost rp
         JOIN RecommendedItem ri ON rp.recommended_item_id = ri.recommended_item_id
         JOIN Category c ON ri.category_id = c.category_id
@@ -44,6 +45,7 @@ def group_feed(request, group_id):
             'time_stamp': row[7],
             'title': row[8],
             'posted_by': row[9],
+            'posted_by_id': row[10],
         }
 
         # https://stackoverflow.com/questions/35918831/dict-setdefault-appends-one-extra-default-item-into-the-value-list
@@ -118,6 +120,21 @@ def group_detail(request, recommendation_post_id):
     }
 
     return render(request, 'group_detail.html', context)
+
+def save_recc(request, recommendation_post_id, posted_by_id, group_id):
+    if request.method == 'POST':
+        user_saved_id = request.session.get('user_id')
+        date_saved = datetime.now()
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO SavedRecommendations (date_saved, user_posted_id, user_saved_id, recommendation_id)
+                VALUES (%s, %s, %s, %s)
+            """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
+
+    return redirect('group_feed', group_id=group_id)
+
+
 
 def add_comment(request, recommendation_post_id):
     if request.method == "POST":

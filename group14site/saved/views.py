@@ -39,6 +39,20 @@ def get_comments(rec_id):
    return comments
 
 ##MODIFY LATER: change to user id (not hardcoded)
+
+def delete_rec(request, rec_id):
+    print("rec_id", rec_id)
+    user_id = request.session.get('user_id')
+    with connection.cursor() as c:
+        c.execute("""
+        DELETE FROM SavedRecommendations WHERE user_saved_id = %s AND saved_recommendation_id = %s
+        """, [user_id, rec_id])
+
+    saved_recs = get_saved_recs(request)
+    context = {
+        'saved_recs': saved_recs,
+    }
+    return render(request, 'saved_recs.html', context)
 def handle_upvote(request, rec_id):
     user_id = request.session.get('user_id')
     with connection.cursor() as c:
@@ -65,6 +79,7 @@ def handle_upvote(request, rec_id):
     return redirect('saved_rec_details', rec_id=rec_id)
 
 def handle_downvote(request, rec_id):
+    user_id = request.session.get('user_id')
     with connection.cursor() as c:
         # This is to see how the user has/has not voted
         c.execute("""SELECT vote_type FROM voting WHERE user_id = %s AND recommendation_post = %s""",
