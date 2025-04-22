@@ -131,10 +131,17 @@ def save_recc(request, recommendation_post_id, posted_by_id, group_id):
 
         with connection.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO SavedRecommendations (date_saved, user_posted_id, user_saved_id, recommendation_id)
-                VALUES (%s, %s, %s, %s)
-            """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
+            SELECT * FROM SavedRecommendations WHERE user_saved_id = %s AND recommendation_id = %s""",
+                           [user_saved_id, recommendation_post_id])
+            rows = cursor.fetchall()
+            number_of_rows = len(rows)
 
+        if number_of_rows == 0:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO SavedRecommendations (date_saved, user_posted_id, user_saved_id, recommendation_id)
+                    VALUES (%s, %s, %s, %s)
+                """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
     return redirect('group_feed', group_id=group_id)
 
 
@@ -144,11 +151,21 @@ def save_recc_det(request, recommendation_post_id, posted_by_id):
         print("RECC ID", recommendation_post_id)
         date_saved = datetime.now()
 
+
         with connection.cursor() as cursor:
             cursor.execute("""
-                INSERT INTO SavedRecommendations (date_saved, user_posted_id, user_saved_id, recommendation_id)
-                VALUES (%s, %s, %s, %s)
-            """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
+            SELECT * FROM SavedRecommendations WHERE user_saved_id = %s AND recommendation_id = %s""", [user_saved_id, recommendation_post_id])
+            rows = cursor.fetchall()
+            number_of_rows = len(rows)
+
+        if number_of_rows == 0:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO SavedRecommendations (date_saved, user_posted_id, user_saved_id, recommendation_id)
+                    VALUES (%s, %s, %s, %s)
+                """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
+
+
 
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
 
