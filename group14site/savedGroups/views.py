@@ -36,9 +36,9 @@ def get_groups_created(user_id):
 
 def admin_view(request, group_id):
     if request.method == 'POST':
-        uid_to_remove = request.POST.get('user_id')
+        uid_to_remove = int(request.POST.get('user_id'))
         with connection.cursor() as c:
-            c.execute("""DELETE FROM groupmembers WHERE group_id = %s""", [group_id, uid_to_remove])
+            c.execute("""DELETE FROM GroupsMembers WHERE group_id = %s AND user_id = %s""", [group_id, uid_to_remove])
         return redirect('admin_view', group_id=group_id)
 
     group_members = get_group_members(group_id)

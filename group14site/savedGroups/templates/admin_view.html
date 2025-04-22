@@ -55,7 +55,7 @@
           <form method="POST" style="display:inline;">
             {% csrf_token %}
             <input type="hidden" name="user_id" value="{{ member.user_id }}">
-            <button type="submit" class="btn btn-sm" style="background-color: white; color:red; border:2px solid red;">Remove Member</button>
+            <button type="submit" class="btn btn-sm" onclick="return confirm('Are you sure you want to remove this member?');"style="background-color: white; color:red; border:2px solid red;">Remove Member</button>
           </form>
         </td>
       </tr>

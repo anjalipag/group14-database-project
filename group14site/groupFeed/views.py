@@ -232,7 +232,7 @@ def admin_delete_comment(request, comment_id, post_id):
 
         with connection.cursor() as c:
             c.execute("""SELECT rp.group_id FROM Comment c JOIN RecommendationPost rp ON c.recommendation_post_id = rp.recommendation_post_id WHERE c.comment_id = %s""", [comment_id])
-            row=cursor.fetchone()
+            row=c.fetchone()
             if not row:
                 return redirect('group_detail', recommendation_post_id = post_id)
             group_id = row[0]
@@ -242,6 +242,6 @@ def admin_delete_comment(request, comment_id, post_id):
 
             #confirm can only delete if current user is the admin
             if user_id == admin_id:
-                cursor.execute("DELETE FROM Comment WHERE comment_id = %s", [comment_id])
+                c.execute("DELETE FROM Comment WHERE comment_id = %s", [comment_id])
 
         return redirect('group_detail', recommendation_post_id=post_id)
