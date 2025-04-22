@@ -39,8 +39,12 @@
 
   <!-- Post Detail -->
   <div class="card mb-5 shadow-lg">
-    <div class="card-header bg-dark text-white">
-      <h2 class="mb-0">{{ post.title }}</h2>
+    <div class="card-header bg-dark text-white mb-3">
+      <h2 class="mb-2">{{ post.title }}</h2>
+      <form action="{% url 'save_recc_det' post.post_id post.posted_by_id %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-success mr-20 ml-20" style="padding-left: 20px; padding-right: 20px;">Save</button>
+    </form>
     </div>
     <div class="card-body">
       <p class="mb-3 poppins-regular"><strong>Description:</strong> {{ post.description }}</p>
@@ -63,6 +67,7 @@
           </button>
         </form>
         </div>
+
         <div class="col-md-3 mb-3">
           <span class="badge rounded-pill white-btn p-2 w-100 poppins-bold">Rating: {{ post.overall_rating }}/5 </span>
         </div>
@@ -75,12 +80,15 @@
         Posted by <strong>{{ post.posted_by }}</strong> on {{ post.time_stamp }}
       </p>
 
-      <div class="mt-4 mb-3 d-flex">
-        <a href="" class="btn btn-outline-primary mr-2" data-toggle="modal" data-target="#commentModal">Add Comment</a>
-        {% if post.extra_info %}
-          <a href="{{ post.extra_info }}" class="btn btn-primary" target="_blank">Learn More</a>
-        {% endif %}
-      </div>
+      <div class="mt-4 mb-3 d-flex justify-content-start">
+    <a href="" class="btn btn-outline-primary mr-3 pt-2 pb-1" data-toggle="modal" data-target="#commentModal">Add Comment</a>
+    {% if post.extra_info %}
+        <a href="{{ post.extra_info }}" class="btn btn-primary mr-3 " target="_blank">Learn More</a>
+    {% endif %}
+</div>
+
+
+
     </div>
   </div>
 
