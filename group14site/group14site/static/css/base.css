@@ -1,23 +1,10 @@
 
 body{
-      font-family: "Special Gothic Expanded One", sans-serif;
   font-style: normal;
     color:black;
 
 }
 
-.poppins-regular {
-  font-family: "Poppins", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-
-.poppins-bold {
-  font-family: "Poppins", sans-serif;
-  font-weight: 700;
-  font-style: normal;
-}
 .white-btn{
     background-color: white;
     border: 2px solid black;
@@ -28,6 +15,30 @@ body{
     background-color: #e8e7e7;
      border: 2px solid black;
     color:black;
+}
+
+.btn-red{
+    background-color: white;
+    border: 2px solid red;
+    color:red;
+}
+
+.btn-red:hover, .btn-red:active, .btn-red:focus{
+    background-color: #e8e7e7;
+     border: 2px solid red;
+    color:red;
+}
+
+.btn-green{
+    background-color: white;
+    border: 2px solid green;
+    color:green;
+}
+
+.btn-green:hover, .btn-green:active, .btn-green:focus{
+    background-color: #e8e7e7;
+     border: 2px solid green;
+    color:green;
 }
 
 .reg-text {

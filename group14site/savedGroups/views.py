@@ -1,11 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db import connection
 
 def my_groups(request):
-    # user_id = request.GET.get('user_id')
     user_id = request.session.get('user_id')
     groups = get_groups_joined_by_user(user_id)
-    return render(request, 'my_groups.html', {'groups': groups})
+    groups_created = get_groups_created(user_id)
+    return render(request, 'my_groups.html', {'groups': groups, 'groups_created': groups_created})
 
 def get_groups_joined_by_user(user_id):
     with connection.cursor() as c:
@@ -20,3 +20,63 @@ def get_groups_joined_by_user(user_id):
         """, [user_id])
         cols = [col[0] for col in c.description]
         return [dict(zip(cols, row)) for row in c.fetchall()]
+
+def get_groups_created(user_id):
+    with connection.cursor() as c:
+        c.execute("""
+            SELECT g.group_id, g.group_name, g.group_photo,
+                   g.admin_id AS admin_username
+            FROM groups g
+            JOIN users u ON g.admin_id = u.user_id
+            WHERE g.admin_id = %s
+        """, [user_id])
+        cols = [col[0] for col in c.description]
+        return [dict(zip(cols, row)) for row in c.fetchall()]
+
+
+def admin_view(request, group_id):
+    if request.method == 'POST':
+        uid_to_remove = int(request.POST.get('user_id'))
+        with connection.cursor() as c:
+            c.execute("""DELETE FROM GroupsMembers WHERE group_id = %s AND user_id = %s""", [group_id, uid_to_remove])
+        return redirect('admin_view', group_id=group_id)
+
+    group_members = get_group_members(group_id)
+    group_name = get_group_name(group_id)
+    return render(request, 'admin_view.html', {'group_id': group_id, 'group_name': group_name, 'group_members': group_members})
+
+def get_group_members(group_id):
+    with connection.cursor() as c:
+        c.execute("""
+               SELECT * FROM groupsmembers gm JOIN users u ON gm.user_id = u.user_id WHERE gm.group_id = %s AND gm.invitation_status = 'Accepted'
+           """, [group_id])
+        cols = [col[0] for col in c.description]
+        return [dict(zip(cols, row)) for row in c.fetchall()]
+
+def get_group_name(group_id):
+    with connection.cursor() as c:
+        c.execute("""
+               SELECT group_name FROM groups WHERE groups.group_id = %s
+           """, [group_id])
+        row = c.fetchone()
+        return row[0]
+
+def manage_requests(request, group_id):
+    if request.method == 'POST':
+        action = request.POST.get("action")
+        uid = request.POST.get("user_id")
+
+        with connection.cursor() as c:
+            if action == "accept":
+                c.execute("""
+                UPDATE GroupsMembers SET invitation_status = 'Accepted' WHERE group_id = %s AND user_id = %s""", [group_id, uid])
+            elif action == "reject":
+                c.execute("""DELETE FROM GroupsMembers WHERE group_id = %s AND user_id = %s AND invitation_status = 'Pending'""", [group_id, uid])
+        return redirect("manage_requests", group_id = group_id)
+
+    #If not trying to mod requests, just default and show pending requests
+    with connection.cursor() as c:
+        c.execute("""SELECT u.user_id, u.username FROM groupsmembers gm JOIN users u on gm.user_id = u.user_id WHERE gm.group_id=%s AND gm.invitation_status = 'Pending'""", [group_id])
+
+        pending_requests = c.fetchall()
+    return render(request, 'manage_requests.html', {"group_id": group_id, "pending_requests": pending_requests,})

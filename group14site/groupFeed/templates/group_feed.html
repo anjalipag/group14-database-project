@@ -55,6 +55,7 @@
                 <th schope="col">Posted By</th>
                 <th scope="col">Posted At</th>
                 <th scope="col">Discover & Save</th>
+                <th scope="col"> </th>
               </tr>
             </thead>
             <tbody class="poppins-regular">
@@ -67,7 +68,7 @@
                   <td>{{ post.time_stamp }}</td>
                   <td class="d-flex gap-2">
   <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary mr-2">
-    Learn More
+    See More
   </a>
 <form action="{% url 'save_recc' post.post_id post.posted_by_id group_id %}" method="post" style="display:inline;">
     {% csrf_token %}
@@ -75,6 +76,15 @@
 </form>
 
 </td>
+                  <td>
+
+                    {% if user_id == admin_id %}
+                      <form method="POST" action="{% url 'delete_post' post.post_id %}" class="d-inline" onsubmit="return confirmDelete();">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" style="color:red; background-color:white; border:2px solid red;">Delete Post</button>
+                      </form>
+                    {% endif %}
+                  </td>
                 </tr>
               {% endfor %}
             </tbody>

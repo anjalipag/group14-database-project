@@ -9,7 +9,9 @@ urlpatterns = [
     path('detail/<int:recommendation_post_id>/downvote', views.handle_downvote, name='downvote'),
     path('saved/<int:recommendation_post_id>/<int:posted_by_id>/<int:group_id>', views.save_recc,
          name='save_recc'),
-    path('saved/detail/<int:recommendation_post_id>/<int:posted_by_id>/', views.save_recc_det, name='save_recc_det')
+    path('saved/detail/<int:recommendation_post_id>/<int:posted_by_id>/', views.save_recc_det, name='save_recc_det'),
 
+    path('group/delete/<int:post_id>/', views.delete_post, name='delete_post'),
+    path('comment/delete/<int:comment_id>/<int:post_id>/', views.admin_delete_comment, name='admin_delete_comment'),
 
 ]
