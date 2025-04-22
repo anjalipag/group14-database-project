@@ -4,14 +4,27 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import connection
 from datetime import datetime
+from django.urls import reverse
 
 # chatGPT was used to understand how to use connection.cursor() and understand POST without model forms
 def index(request):
     return HttpResponse("Hello, world. You're at the home index.")
 
+def get_total_post_count(group_id):
+    with connection.cursor() as c:
+        c.execute("""SELECT COUNT(*) FROM RecommendationPost WHERE group_id = %s""", [group_id])
+        count = c.fetchone()[0]
+    return count
+
 def group_feed(request, group_id):
+    total_post_count = get_total_post_count(group_id)
     post_by_category ={}
     with connection.cursor() as cursor:
+        #get admin id for later to check if someone has admin permissions
+        cursor.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
+        admin_id = cursor.fetchone()[0]
+
+
         cursor.execute("""
         SELECT
             c.category_name,
@@ -51,7 +64,10 @@ def group_feed(request, group_id):
 
     context = {
         'group_id': group_id,
+        'total_posts': total_post_count,
         'category_posts': post_by_category,
+        'admin_id': admin_id,
+        'user_id':request.session.get('user_id'),
     }
 
     return render(request, 'group_feed.html', context)
@@ -104,17 +120,26 @@ def group_detail(request, recommendation_post_id):
         rows = cursor.fetchall()
         for row in rows:
             comment_data = {
+                'comment_id' : row[0],
                 'comment_text': row[1],
                 'time_posted': row[2],
                 'posted_by': row[3]
             }
             all_comments.append(comment_data)
 
-    print("all_comments", all_comments)
+    # print("all_comments", all_comments)
+    #Get admin ID for delete admin perms
+        cursor.execute("SELECT group_id FROM RecommendationPost WHERE recommendation_post_id = %s", [recommendation_post_id])
+        group_id = cursor.fetchone()[0]
+        cursor.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
+        admin_id = cursor.fetchone()[0]
+
     context = {
         'recommendation_post_id': recommendation_post_id,
         'post': post_data,
         'comments_for_post': all_comments,
+        'admin_id': admin_id,
+        'user_id':request.session.get('user_id'),
     }
 
     return render(request, 'group_detail.html', context)
@@ -191,3 +216,41 @@ def handle_downvote(request, recommendation_post_id):
 
     # Reload page
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
+
+def delete_post(request, post_id):
+    if request.method == "POST":
+        uid = request.session.get("user_id")
+        with connection.cursor() as c:
+            c.execute("""SELECT g.group_id, g.admin_id FROM Groups g JOIN RecommendationPost rp ON g.group_id = rp.group_id
+            WHERE rp.recommendation_post_id = %s""", [post_id])
+            result = c.fetchone()
+
+            #make sure the user is the admin of the group
+            if result:
+                group_id, admin_id = result
+                if uid == admin_id:
+                    c.execute("DELETE FROM RecommendationPost WHERE recommendation_post_id = %s", [post_id])
+                return redirect(reverse('group_feed'), args[group_id])
+
+    return redirect('/')
+
+    return redirect('group_feed.html', recommendation_post_id=recommendation_post_id)
+
+def admin_delete_comment(request, comment_id, post_id):
+        user_id = request.session.get("user_id")
+
+        with connection.cursor() as c:
+            c.execute("""SELECT rp.group_id FROM Comment c JOIN RecommendationPost rp ON c.recommendation_post_id = rp.recommendation_post_id WHERE c.comment_id = %s""", [comment_id])
+            row=c.fetchone()
+            if not row:
+                return redirect('group_detail', recommendation_post_id = post_id)
+            group_id = row[0]
+
+            c.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
+            admin_id = c.fetchone()[0]
+
+            #confirm can only delete if current user is the admin
+            if user_id == admin_id:
+                c.execute("DELETE FROM Comment WHERE comment_id = %s", [comment_id])
+
+        return redirect('group_detail', recommendation_post_id=post_id)

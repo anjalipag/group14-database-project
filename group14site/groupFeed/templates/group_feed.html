@@ -6,6 +6,11 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/base.css' %}" rel="stylesheet">
+<script>
+  function confirmDelete(){
+    return confirm("Are you sure you want to delete this user's post?");
+  }
+</script>
 
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -33,6 +38,10 @@
           </div>
         </nav>
 <div class="container my-5">
+{% if total_posts == 0 %}
+  <h4>No posts have been made in this group yet.</h4>
+  <a href="{% url 'my_groups' %}" class="btn btn-outline-primary mt-2">Go Back</a>
+{% else %}
   {% for category, posts in category_posts.items %}
     <div class="card mb-5 shadow-sm">
       <div class="card-header bg-dark text-white">
@@ -46,12 +55,12 @@
                 <th scope="col">Title</th>
                 <th scope="col">Description</th>
                 <th scope="col">Rating</th>
-                <th schope="col">Posted By</th>
+                <th scope="col">Posted By</th>
                 <th scope="col">Posted At</th>
                 <th scope="col">View More</th>
               </tr>
             </thead>
-            <tbody class="poppins-regular">
+            <tbody class="">
               {% for post in posts %}
                 <tr>
                   <td><strong>{{ post.title }}</strong></td>
@@ -60,7 +69,13 @@
                   <td>{{ post.posted_by }}</td>
                   <td>{{ post.time_stamp }}</td>
                   <td>
-                    <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary">Learn More</a>
+                    <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary mb-2">See More</a>
+                    {% if user_id == admin_id %}
+                      <form method="POST" action="{% url 'delete_post' post.post_id %}" class="d-inline" onsubmit="return confirmDelete();">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" style="color:red; background-color:white; border:2px solid red;">Delete Post</button>
+                      </form>
+                    {% endif %}
                   </td>
                 </tr>
               {% endfor %}
@@ -70,4 +85,6 @@
       </div>
     </div>
   {% endfor %}
+{% endif %}
+
 </div>
