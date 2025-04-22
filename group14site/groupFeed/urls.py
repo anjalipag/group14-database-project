@@ -8,5 +8,6 @@ urlpatterns = [
     path('detail/<int:recommendation_post_id>/add_comment', views.add_comment, name='add_comment'),
     path('detail/<int:recommendation_post_id>/upvote', views.handle_upvote, name='upvote'),
     path('detail/<int:recommendation_post_id>/downvote', views.handle_downvote, name='downvote'),
+    path('search/', views.search_deezer, name='search_deezer'),
 
 ]

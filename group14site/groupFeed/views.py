@@ -248,3 +248,29 @@ def handle_downvote(request, recommendation_post_id):
 
     # Reload page
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
+import requests
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def search_deezer(request):
+    if request.method == 'GET':
+        query = request.GET.get('query', '')
+        if not query:
+            return JsonResponse({'error': 'Missing query'}, status=400)
+
+        response = requests.get(f'https://api.deezer.com/search?q={query}')
+        data = response.json()
+
+        tracks = []
+        for item in data.get('data', []):
+            tracks.append({
+                'title': item['title'],
+                'artist': item['artist']['name'],
+                'album': item['album']['title'],
+                'preview_url': item['preview'],
+                'deezer_url': item['link'],
+            })
+
+        return JsonResponse({'tracks': tracks})
+    return JsonResponse({'error': 'Only GET allowed'}, status=405)
