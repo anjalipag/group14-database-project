@@ -10,4 +10,6 @@ urlpatterns = [
     path('detail/<int:recommendation_post_id>/downvote', views.handle_downvote, name='downvote'),
     path('search/', views.search_deezer, name='search_deezer'),
     path('search_books/', views.search_openlibrary, name='search_openlibrary'),
+    path('search_movies/', views.search_omdb_movies, name='search_omdb_movies'),
+    path('search_shows/', views.search_omdb_shows, name='search_omdb_shows'),
 ]

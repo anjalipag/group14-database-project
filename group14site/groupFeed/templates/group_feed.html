@@ -2,16 +2,10 @@
 
 {% load static %}
 
-<!-- Bootstrap 4.5.2 -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <!-- Custom Styles -->
 <link href="{% static 'css/base.css' %}" rel="stylesheet">
-
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100..900;1,100..900&family=Special+Gothic+Expanded+One&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 <!-- Navbar -->
@@ -176,7 +170,20 @@ document.addEventListener('DOMContentLoaded', () => {
           .then(res => res.json())
           .then(data => showSuggestions(data.books || [], 'book'))
           .catch(err => console.error(err));
-      } else {
+      } else if (category.includes('movie')) {
+        fetch(`/group/feed/search_movies/?query=${encodeURIComponent(query)}`)
+          .then(res => res.json())
+          .then(data => showSuggestions(data.movies || [], 'movie'))
+          .catch(err => console.error(err));
+      }
+      else if (category.includes('show')) {
+        fetch(`/group/feed/search_shows/?query=${encodeURIComponent(query)}`)
+          .then(res => res.json())
+          .then(data => showSuggestions(data.shows || [], 'show'))
+          .catch(err => console.error(err));
+      }
+
+      else {
         suggestionsBox.innerHTML = '';
       }
     }, debounceDelay);
@@ -192,7 +199,12 @@ document.addEventListener('DOMContentLoaded', () => {
     items.forEach(item => {
       const displayText = type === 'music'
         ? `${item.title} by ${item.artist}`
-        : `${item.title} by ${item.author}`;
+              : type === 'book'
+                ? `${item.title} by ${item.author}`
+                : type === 'movie'
+                  ? `${item.title} (${item.year})`
+                  : `${item.title} (${item.year})`;
+
 
       const listItem = document.createElement('button');
       listItem.type = 'button';

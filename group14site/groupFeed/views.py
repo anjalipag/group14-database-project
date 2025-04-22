@@ -7,6 +7,7 @@ from datetime import datetime
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 
 # chatGPT was used to understand how to use connection.cursor() and understand POST without model forms
 def index(request):
@@ -295,3 +296,57 @@ def search_openlibrary(request):
 
         return JsonResponse({'books': books})
     return JsonResponse({'error': 'Only GET allowed'}, status=405)
+
+
+@csrf_exempt
+def search_omdb_movies(request):
+    if request.method == 'GET':
+        query = request.GET.get('query', '')
+        if not query:
+            return JsonResponse({'error': 'Missing query'}, status=400)
+
+
+        response = requests.get(f'https://www.omdbapi.com/?apikey={settings.OMDB_KEY}&s={query}')
+        data = response.json()
+
+        if data.get('Response') == 'False':
+            return JsonResponse({'error': data.get('Error', 'Movie not found')}, status = 404)
+
+        movies = []
+        for movie in data.get('Search', [])[:10]:
+            if movie.get("Type") == "movie":
+                movies.append({
+                    'title': movie.get('Title'),
+                    'year': movie.get('Year', []),
+                    'director': movie.get('Director'),
+                    'duration': movie.get('Duration'),
+                })
+
+        return JsonResponse({'movies': movies})
+    return JsonResponse({'error': 'Only GET allowed'}, status=405)
+
+def search_omdb_shows(request):
+    if request.method == 'GET':
+        query = request.GET.get('query', '')
+        if not query:
+            return JsonResponse({'error': 'Missing query'}, status=400)
+
+        response = requests.get(f'https://www.omdbapi.com/?apikey={settings.OMDB_KEY}&s={query}')
+        data = response.json()
+
+        if data.get('Response') == 'False':
+            return JsonResponse({'error': data.get('Error', 'Show not found')}, status=404)
+
+        shows = []
+        for show in data.get('Search', [])[:10]:  # Limit to 10 results
+            if show.get('Type') == "series":
+                shows.append({
+                    'title': show.get('Title'),
+                    'year': show.get('Year', []),
+                    'director': show.get('Director'),
+                    'season_count': show.get('totalSeasons'),
+                })
+
+        return JsonResponse({'shows': shows})
+    return JsonResponse({'error': 'Only GET allowed'}, status=405)
+
