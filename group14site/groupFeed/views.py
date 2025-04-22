@@ -274,3 +274,25 @@ def search_deezer(request):
 
         return JsonResponse({'tracks': tracks})
     return JsonResponse({'error': 'Only GET allowed'}, status=405)
+
+@csrf_exempt
+def search_openlibrary(request):
+    if request.method == 'GET':
+        query = request.GET.get('query', '')
+        if not query:
+            return JsonResponse({'error': 'Missing query'}, status=400)
+
+        response = requests.get(f'https://openlibrary.org/search.json?q={query}')
+        data = response.json()
+
+        books = []
+        for doc in data.get('docs', [])[:10]:  # Limit to 10 results
+            books.append({
+                'title': doc.get('title'),
+                'author': ', '.join(doc.get('author_name', [])),
+                'cover_url': f"http://covers.openlibrary.org/b/id/{doc['cover_i']}-M.jpg" if 'cover_i' in doc else None,
+                'openlibrary_url': f"https://openlibrary.org{doc['key']}",
+            })
+
+        return JsonResponse({'books': books})
+    return JsonResponse({'error': 'Only GET allowed'}, status=405)

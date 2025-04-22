@@ -186,3 +186,43 @@ function searchDeezer() {
         });
 }
 </script>
+
+<hr>
+<h3>Search Open Library for Books</h3>
+<input type="text" id="bookQuery" placeholder="Type a book title or author..." />
+<button onclick="searchBooks()">Search</button>
+
+<ul id="bookResults"></ul>
+
+<script>
+function searchBooks() {
+    const query = document.getElementById('bookQuery').value;
+
+    fetch(`/group/feed/search_books/?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            const results = document.getElementById('bookResults');
+            results.innerHTML = '';
+
+            if (data.error) {
+                results.innerHTML = `<li>Error: ${data.error}</li>`;
+                return;
+            }
+
+            data.books.forEach(book => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${book.title}</strong> by ${book.author}<br>
+                    <a href="${book.openlibrary_url}" target="_blank">View on Open Library</a><br>
+                    ${book.cover_url ? `<img src="${book.cover_url}" alt="Cover" height="100">` : '<em>No cover available</em>'}
+                `;
+                results.appendChild(li);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('bookResults').innerHTML = '<li>Something went wrong!</li>';
+        });
+}
+</script>
+
