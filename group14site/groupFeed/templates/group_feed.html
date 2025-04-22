@@ -65,11 +65,11 @@
                   <td>{{ post.posted_by }}</td>
                   <td>{{ post.time_stamp }}</td>
                   <td>
-                    <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary mb-2">Learn More</a>
+                    <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary mb-2">See More</a>
                     {% if user_id == admin_id %}
                     <form method ="POST" action="{%url 'delete_post' post.post_id %}" class = "d-inline" onsubmit="return confirmDelete();">
                       {% csrf_token %}
-                      <button type="submit" class = "btn btn-sm btn-danger" style="color:red; background-color:white; border:1px solid red;">Delete Post</button>
+                      <button type="submit" class = "btn btn-sm btn-danger" style="color:red; background-color:white; border:2px solid red;">Delete Post</button>
                     </form>
                     {% endif %}
                   </td>
