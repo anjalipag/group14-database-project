@@ -10,8 +10,8 @@
 
 ## Install django and dependencies
 pip install django
-<br> pip install django-bootstrap5 
-<br> pip install psycopg2 </br>
+pip install -r requirements.txt
+
 
 ## Clone the repo
 git clone https://github.com/anjalipag/group14-database-project.git
