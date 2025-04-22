@@ -8,11 +8,16 @@ def index(request):
    }
    return render(request, 'saved_recs.html', context)
 
-#NOTE: right now I cannot filter saved recs to a specific user id because I can't login and save user id state
 def get_saved_recs(request):
    user_id = request.session.get('user_id')
    with connection.cursor() as c:
-      c.execute("SELECT * FROM savedrecommendations JOIN users ON user_posted_id = user_id NATURAL JOIN recommendationpost NATURAL JOIN recommendeditem NATURAL JOIN groups WHERE user_saved_id = %s", [user_id])
+      c.execute(""" SELECT *
+                    FROM savedrecommendations sr
+                    JOIN users u ON sr.user_posted_id = u.user_id
+                    JOIN recommendationpost rp ON sr.recommendation_id = rp.recommendation_post_id
+                    JOIN recommendeditem ri ON rp.recommended_item_id = ri.recommended_item_id
+                    JOIN groups g ON rp.group_id = g.group_id
+                    WHERE sr.user_saved_id = %s""", [user_id])
       cols = [col[0] for col in c.description]
       saved_recs =  [dict(zip(cols, row)) for row in c.fetchall()]
    return saved_recs
