@@ -8,11 +8,16 @@ def index(request):
    }
    return render(request, 'saved_recs.html', context)
 
-#NOTE: right now I cannot filter saved recs to a specific user id because I can't login and save user id state
 def get_saved_recs(request):
    user_id = request.session.get('user_id')
    with connection.cursor() as c:
-      c.execute("SELECT * FROM savedrecommendations JOIN users ON user_posted_id = user_id NATURAL JOIN recommendationpost NATURAL JOIN recommendeditem NATURAL JOIN groups WHERE user_saved_id = %s", [user_id])
+      c.execute(""" SELECT *
+                    FROM savedrecommendations sr
+                    JOIN users u ON sr.user_posted_id = u.user_id
+                    JOIN recommendationpost rp ON sr.recommendation_id = rp.recommendation_post_id
+                    JOIN recommendeditem ri ON rp.recommended_item_id = ri.recommended_item_id
+                    JOIN groups g ON rp.group_id = g.group_id
+                    WHERE sr.user_saved_id = %s""", [user_id])
       cols = [col[0] for col in c.description]
       saved_recs =  [dict(zip(cols, row)) for row in c.fetchall()]
    return saved_recs
@@ -39,6 +44,20 @@ def get_comments(rec_id):
    return comments
 
 ##MODIFY LATER: change to user id (not hardcoded)
+
+def delete_rec(request, rec_id):
+    print("rec_id", rec_id)
+    user_id = request.session.get('user_id')
+    with connection.cursor() as c:
+        c.execute("""
+        DELETE FROM SavedRecommendations WHERE user_saved_id = %s AND saved_recommendation_id = %s
+        """, [user_id, rec_id])
+
+    saved_recs = get_saved_recs(request)
+    context = {
+        'saved_recs': saved_recs,
+    }
+    return render(request, 'saved_recs.html', context)
 def handle_upvote(request, rec_id):
     user_id = request.session.get('user_id')
     with connection.cursor() as c:
@@ -65,6 +84,7 @@ def handle_upvote(request, rec_id):
     return redirect('saved_rec_details', rec_id=rec_id)
 
 def handle_downvote(request, rec_id):
+    user_id = request.session.get('user_id')
     with connection.cursor() as c:
         # This is to see how the user has/has not voted
         c.execute("""SELECT vote_type FROM voting WHERE user_id = %s AND recommendation_post = %s""",

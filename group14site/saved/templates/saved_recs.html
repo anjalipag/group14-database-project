@@ -50,6 +50,8 @@
                              <p class="card-text">@{{ rec.username }}</p>
                             <p><span class="badge rounded-pill text-bg-light poppins-bold" style = "border: 1px solid black;">{{ rec.group_name }}</span></p>
                             <a href="{% url 'group_detail' rec.recommendation_post_id %}" class="btn  btn-primary mt-2 mb-2">See Recommendation</a>
+                            <a href="{% url 'delete_rec' rec.saved_recommendation_id %}" class="btn  btn-secondary mt-2 mb-2">Delete Recommendation</a>
+
                         </div>
                     </div>
                 </div>
