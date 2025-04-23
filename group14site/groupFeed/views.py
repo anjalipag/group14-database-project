@@ -21,6 +21,18 @@ def get_total_post_count(group_id):
         count = c.fetchone()[0]
     return count
 
+def leave_group(request, group_id):
+    user_id = request.session.get('user_id')
+    with connection.cursor() as c:
+        c.execute("""DELETE FROM GroupsMembers WHERE user_id = %s AND group_id = %s""", [user_id, group_id])
+    return redirect("/group/saved/")
+
+def delete_group(request, group_id):
+    user_id = request.session.get('user_id')
+    with connection.cursor() as c:
+        c.execute("""DELETE FROM Groups WHERE admin_id = %s AND group_id = %s""", [user_id, group_id])
+    return redirect("/group/saved/")
+
 def group_feed(request, group_id):
     total_post_count = get_total_post_count(group_id)
     post_by_category ={}

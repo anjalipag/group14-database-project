@@ -20,4 +20,6 @@ urlpatterns = [
     path('group/delete/<int:post_id>/', views.delete_post, name='delete_post'),
     path('comment/delete/<int:comment_id>/<int:post_id>/', views.admin_delete_comment, name='admin_delete_comment'),
     path('group_image/<int:group_id>/', views.serve_group_image, name='serve_group_image'),
+    path('leave_group/<int:group_id>/', views.leave_group, name='leave_group'),
+    path('delete_group/<int:group_id>/', views.delete_group, name='delete_group'),
 ]
