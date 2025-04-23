@@ -41,7 +41,7 @@
   </script>
    {% endfor %}
 {% endif %}
-<img src="{% url 'serve_group_image' group_id %}" class="card-img-top" style="width: 35%; padding-top: 15px; margin: 0 auto; display: block;" alt="Group image">
+<img src="{% url 'serve_group_image' group_id %}" class="rounded-circle mt-4" style="width: 300px; height:300px;object-fit:cover;padding-top: 15px; margin: 0 auto; display: block;" alt="Group image">
 <h2 class="mb-2 text-center" style="padding-top: 10px;">{{ group_title }}</h2>
 <h5 class="mb-2 text-center" style="padding-top: 5px; color: grey;"><em>{{ group_des }}</em></h5>
 <div class="container my-5">
