@@ -230,7 +230,7 @@ def delete_post(request, post_id):
                 group_id, admin_id = result
                 if uid == admin_id:
                     c.execute("DELETE FROM RecommendationPost WHERE recommendation_post_id = %s", [post_id])
-                return redirect(reverse('group_feed'), args[group_id])
+                return redirect('group_feed', group_id=group_id)
 
     return redirect('/')
 
