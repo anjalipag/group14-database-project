@@ -152,8 +152,8 @@ def insert_into_category(category_name, external_id, recommended_item_id, title)
             duration_secs = music_tbl_data['duration']
             mins = duration_secs // 60
             seconds = duration_secs % 60
-            cursor.execute( """INSERT INTO Song (artist, duration, recommended_item_id) VALUES (%s, %s, %s)""",
-                [music_tbl_data['artist'],f"{mins} minutes {seconds} seconds", recommended_item_id])
+            cursor.execute( """INSERT INTO Song (artist, duration, recommended_item_id, album) VALUES (%s, %s, %s, %s)""",
+                [music_tbl_data['artist'],f"{mins} minutes {seconds} seconds", recommended_item_id, music_tbl_data['album']])
 
         if category_name == "Books":
             books_tbl_data = search_openlibrary_by_id_for_extra_info(title, external_id)
@@ -251,11 +251,11 @@ def get_extra_info(recommendation_post_id):
             if result:
                 return {'Director': result[0], 'Season Count': result[1], 'Rated': result[2], 'Plot': result[3]}
         elif category_name == "Music":
-            c.execute("""SELECT artist, duration FROM Song WHERE recommended_item_id = %s""",
+            c.execute("""SELECT artist, duration, album FROM Song WHERE recommended_item_id = %s""",
                       [recommendation_item_id])
             result = c.fetchone()
             if result:
-                return {'Artist': result[0], 'Duration': result[1]}
+                return {'Artist': result[0], 'Duration': result[1], 'Album': result[2]}
         elif category_name == "Books":
             c.execute("""SELECT author, year_published FROM Book WHERE recommended_item_id = %s""",
                       [recommendation_item_id])
@@ -377,7 +377,8 @@ def search_deezer_by_id_for_extra_info(title,external_id):
         if str(item['id']) == str(external_id):
             result = {'title': item['title'],
                       'artist': item['artist']['name'],
-                      'duration': item['duration']}
+                      'duration': item['duration'],
+                        'album': item['album']['title']}
 
     return result
 
