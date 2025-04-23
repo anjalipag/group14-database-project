@@ -136,19 +136,15 @@ def insert_into_category(category_name, external_id, recommended_item_id, title)
             movie_tbl_data = search_omdb_by_id_for_extra_info(external_id, "Movies")
 
             cursor.execute(
-                """INSERT INTO Movie (director, duration, recommended_item_id) VALUES (%s, %s, %s)""",
-                [movie_tbl_data['director'], movie_tbl_data['duration'], recommended_item_id]
+                """INSERT INTO Movie (director, duration, recommended_item_id, rated, plot) VALUES (%s, %s, %s, %s, %s)""",
+                [movie_tbl_data['director'], movie_tbl_data['duration'], recommended_item_id, movie_tbl_data['rated'], movie_tbl_data['plot']]
             )
         if category_name == "TV Shows":
-            movie_tbl_data = search_omdb_by_id_for_extra_info(external_id, "TV Shows")
-            if not isinstance(movie_tbl_data['season_count'], int):
-                season_count = 0
-            else:
-                season_count = movie_tbl_data['season_count']
+            tv_show_data = search_omdb_by_id_for_extra_info(external_id, "TV Shows")
 
             cursor.execute(
                 """INSERT INTO TVShow (director, season_count, recommended_item_id) VALUES (%s, %s, %s)""",
-                [movie_tbl_data['director'],season_count, recommended_item_id]
+                [tv_show_data['director'], tv_show_data['season_count'], recommended_item_id]
             )
         if category_name == "Music":
             music_tbl_data = search_deezer_by_id_for_extra_info(title,external_id)
@@ -186,7 +182,7 @@ def group_detail(request, recommendation_post_id):
             WHERE rp.recommendation_post_id = %s
             """, [recommendation_post_id])
         row = cursor.fetchone()
-
+        extra_info = get_extra_info(recommendation_post_id)
         post_data = {
             'post_id': row[1],
             'description': row[2],
@@ -197,7 +193,8 @@ def group_detail(request, recommendation_post_id):
             'time_stamp': row[7],
             'title': row[8],
             'posted_by': row[9],
-            'category_name': row[0]
+            'category_name': row[0],
+            'extra_info': extra_info
         }
 
         all_comments =[]
@@ -220,6 +217,7 @@ def group_detail(request, recommendation_post_id):
             }
             all_comments.append(comment_data)
 
+
     context = {
         'recommendation_post_id': recommendation_post_id,
         'post': post_data,
@@ -228,7 +226,43 @@ def group_detail(request, recommendation_post_id):
 
     return render(request, 'group_detail.html', context)
 
+def get_extra_info(recommendation_post_id):
+    with connection.cursor() as c:
+        #first find category (as category determines the extra info type)
+        c.execute("""SELECT c.category_name, ri.recommended_item_id FROM RecommendationPost rp JOIN RecommendedItem ri ON rp.recommended_item_id = ri.recommended_item_id JOIN Category c ON ri.category_id = c.category_id WHERE rp.recommendation_post_id = %s""", [recommendation_post_id])
 
+        row = c.fetchone()
+
+        if not row:
+            return {}
+
+        category_name, recommendation_item_id = row
+
+        #need to get data from appropriate table (based on rec id and category)
+        if category_name == "Movies":
+            c.execute("""SELECT director, duration, rated, plot FROM Movie WHERE recommended_item_id = %s""", [recommendation_item_id])
+            result = c.fetchone()
+            if result:
+                return {'Director': result[0], 'Duration': result[1], 'Rated': result[2], 'Plot': result[3]}
+        elif category_name == "TV Shows":
+            c.execute("""SELECT director, season_count FROM TVShow WHERE recommended_item_id = %s""",
+                      [recommendation_item_id])
+            result = c.fetchone()
+            if result:
+                return {'Director': result[0], 'Season Count': result[1]}
+        elif category_name == "Music":
+            c.execute("""SELECT artist, duration FROM Song WHERE recommended_item_id = %s""",
+                      [recommendation_item_id])
+            result = c.fetchone()
+            if result:
+                return {'Artist': result[0], 'Duration': result[1]}
+        elif category_name == "Books":
+            c.execute("""SELECT author, year_published FROM Book WHERE recommended_item_id = %s""",
+                      [recommendation_item_id])
+            result = c.fetchone()
+            if result:
+                return {'Author': result[0], 'Year Published': result[1]}
+    return {}
 
 def add_comment(request, recommendation_post_id):
     if request.method == "POST":
@@ -446,21 +480,35 @@ def search_omdb_shows(request):
 def search_omdb_by_id_for_extra_info(imdbid, category):
     response = requests.get(f'https://www.omdbapi.com/?apikey={settings.OMDB_KEY}&i={imdbid}')
     data = response.json()
+    result = {}
 
     if data.get('Response') == 'False':
         return JsonResponse({'error': data.get('Error', 'Nothing found')}, status=404)
 
     if(category == "Movies"):
+        #Need to do this so we don't have multiple values in column (goes against normal forms)
+        director = data.get('Director')
+        if ',' in director:
+            director = director.split(',')[0].strip()
+        else:
+            director = data.get('Director')
         result = {'title': data.get('Title'),
-                'director': data.get('Director'),
-                'duration': data.get('Runtime')}
+                  'director': director,
+                'duration': data.get('Runtime'),
+                  'rated': data.get('Rated'),
+                  'plot': data.get('Plot'),
+                  }
 
     if(category == "TV Shows"):
+        # Need to do this so we don't have multiple values in column (goes against normal forms)
+        if ',' in data.get('Director'):
+            director = director.split(',')[0].strip()
+        else:
+            director = data.get('Director')
         result = {'title': data.get('Title'),
-                'director': data.get('Director'),
+                'director': director,
                 'season_count': data.get('totalSeasons')}
-    else:
-        result = {}
+
 
     return result
 
