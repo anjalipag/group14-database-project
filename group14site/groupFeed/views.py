@@ -71,6 +71,19 @@ def group_feed(request, group_id):
 
     return render(request, 'group_feed.html', context)
 
+def check_if_in_table(title, category_id):
+    if category_id == 1: #Movies
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM Movies WHERE title = %s AND",
+                [category_name]
+            )
+            row = cursor.fetchone()
+            category_id = row[0]
+
+
+
+
 def add_recommendation(request, group_id):
     if request.method == "POST":
         user_id = request.session.get('user_id')
@@ -82,6 +95,8 @@ def add_recommendation(request, group_id):
         time_stamp = datetime.now()
         up_vote_count = 0
         down_vote_count = 0
+        external_id = request.POST.get('external_api_id')
+
 
         # Get category_id from category_name
         with connection.cursor() as cursor:
@@ -92,13 +107,27 @@ def add_recommendation(request, group_id):
             row = cursor.fetchone()
             category_id = row[0]
 
-        # Insert into RecommendedItem
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO RecommendedItem (title, category_id) VALUES (%s, %s) RETURNING recommended_item_id",
-                [title, category_id]
+        #checki if recommended item has already been recommended on before; if so, don't make another item
+        with connection.cursor() as c:
+            c.execute(
+                """SELECT recommended_item_id FROM RecommendedItem WHERE category_id = %s AND external_id = %s""",[category_id, external_id]
             )
-            recommended_item_id= cursor.fetchone()[0]
+            existing_item = c.fetchone()
+
+
+        # Insert into RecommendedItem
+        if existing_item:
+            recommended_item_id = existing_item[0]
+        else:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO RecommendedItem (title, category_id, external_id) VALUES (%s, %s, %s) RETURNING recommended_item_id",
+                    [title, category_id, external_id]
+                )
+                recommended_item_id= cursor.fetchone()[0]
+
+                insert_into_category(category_name, external_id, recommended_item_id)
+
 
         # Insert into RecommendationPost
         with connection.cursor() as cursor:
@@ -113,6 +142,28 @@ def add_recommendation(request, group_id):
 
     return redirect('group_feed', group_id=group_id)
 
+def insert_into_category(category_name, external_id, recommended_item_id):
+    with connection.cursor() as cursor:
+        if category_name == "Movies":
+            movie_tbl_data = search_omdb_by_id_for_extra_info(external_id, "Movies")
+
+            cursor.execute(
+                """INSERT INTO Movie (director, duration, recommended_item_id) VALUES (%s, %s, %s)""",
+                [movie_tbl_data['director'], movie_tbl_data['duration'], recommended_item_id]
+            )
+        if category_name == "TV Shows":
+            movie_tbl_data = search_omdb_by_id_for_extra_info(external_id, "TV Shows")
+            if not isinstance(movie_tbl_data['season_count'], int):
+                season_count = 0;
+            else:
+                season_count = movie_tbl_data['season_count']
+
+            cursor.execute(
+                """INSERT INTO TVShow (director, season_count, recommended_item_id) VALUES (%s, %s, %s)""",
+                [movie_tbl_data['director'],season_count, recommended_item_id]
+            )
+
+
 def group_detail(request, recommendation_post_id):
     with connection.cursor() as cursor:
         cursor.execute("""
@@ -126,7 +177,7 @@ def group_detail(request, recommendation_post_id):
                 rp.extra_info,
                 rp.time_stamp,
                 ri.title,
-                u.username
+                u.username 
             FROM RecommendationPost rp
             JOIN RecommendedItem ri ON rp.recommended_item_id = ri.recommended_item_id
             JOIN Category c ON ri.category_id = c.category_id
@@ -134,6 +185,7 @@ def group_detail(request, recommendation_post_id):
             WHERE rp.recommendation_post_id = %s
             """, [recommendation_post_id])
         row = cursor.fetchone()
+
         post_data = {
             'post_id': row[1],
             'description': row[2],
@@ -167,7 +219,6 @@ def group_detail(request, recommendation_post_id):
             }
             all_comments.append(comment_data)
 
-    print("all_comments", all_comments)
     context = {
         'recommendation_post_id': recommendation_post_id,
         'post': post_data,
@@ -175,6 +226,8 @@ def group_detail(request, recommendation_post_id):
     }
 
     return render(request, 'group_detail.html', context)
+
+
 
 def add_comment(request, recommendation_post_id):
     if request.method == "POST":
@@ -270,6 +323,7 @@ def search_deezer(request):
                 'album': item['album']['title'],
                 'preview_url': item['preview'],
                 'deezer_url': item['link'],
+                'api_id': item['id']
             })
 
         return JsonResponse({'tracks': tracks})
@@ -292,6 +346,7 @@ def search_openlibrary(request):
                 'author': ', '.join(doc.get('author_name', [])),
                 'cover_url': f"http://covers.openlibrary.org/b/id/{doc['cover_i']}-M.jpg" if 'cover_i' in doc else None,
                 'openlibrary_url': f"https://openlibrary.org{doc['key']}",
+                'author_key': doc.get('author_key', [None])[0],
             })
 
         return JsonResponse({'books': books})
@@ -318,8 +373,7 @@ def search_omdb_movies(request):
                 movies.append({
                     'title': movie.get('Title'),
                     'year': movie.get('Year', []),
-                    'director': movie.get('Director'),
-                    'duration': movie.get('Duration'),
+                     'imdbID' : movie.get('imdbID'),
                 })
 
         return JsonResponse({'movies': movies})
@@ -343,10 +397,33 @@ def search_omdb_shows(request):
                 shows.append({
                     'title': show.get('Title'),
                     'year': show.get('Year', []),
-                    'director': show.get('Director'),
-                    'season_count': show.get('totalSeasons'),
+                    'imdbID' : show.get('imdbID'),
                 })
 
         return JsonResponse({'shows': shows})
     return JsonResponse({'error': 'Only GET allowed'}, status=405)
+
+def search_omdb_by_id_for_extra_info(imdbid, category):
+    response = requests.get(f'https://www.omdbapi.com/?apikey={settings.OMDB_KEY}&i={imdbid}')
+    data = response.json()
+
+    if data.get('Response') == 'False':
+        return JsonResponse({'error': data.get('Error', 'Nothing found')}, status=404)
+
+    if(category == "Movies"):
+        result = {'title': data.get('Title'),
+                'director': data.get('Director'),
+                'duration': data.get('Runtime')}
+
+    if(category == "TV Shows"):
+        result = {'title': data.get('Title'),
+                'director': data.get('Director'),
+                'season_count': data.get('totalSeasons')}
+    else:
+        result = {}
+
+    return result
+
+
+
 

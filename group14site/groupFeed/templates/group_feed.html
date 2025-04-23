@@ -69,7 +69,7 @@
                   <td>{{ post.posted_by }}</td>
                   <td>{{ post.time_stamp }}</td>
                   <td>
-                    <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary">Learn More</a>
+                    <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary">See More</a>
                   </td>
                 </tr>
               {% endfor %}
@@ -105,6 +105,7 @@
           </div>
 
           <div class="form-group">
+            <input type = "hidden" id = "external_api_id" name="external_api_id">
             <label for="title">Title</label>
             <input type="text" class="form-control" id="title" name="title" autocomplete="off" required>
             <div id="title-suggestions" class="list-group mt-1"></div>
@@ -112,7 +113,7 @@
 
 
           <div class="form-group">
-            <label for="description">Notes</label>
+            <label for="description">Review</label>
             <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
           </div>
 
@@ -214,6 +215,18 @@ document.addEventListener('DOMContentLoaded', () => {
       listItem.addEventListener('click', () => {
         titleInput.value = type === 'music' ? item.title : item.title;
         suggestionsBox.innerHTML = '';
+
+        //NEEDED FOR SETTING EXTERNAL API ID TO CHECK LATER IF TWO USERS REVIEW ON SAME THING
+        let externalId = null
+        if(type === 'movie' || type === 'show'){
+          externalId = item.imdbID;
+        }else if (type === 'book'){
+          externalId = item.author_key;
+        }else if (type === 'music'){
+          externalId = item.api_id;
+        }
+        document.getElementById('external_api_id').value = externalId;
+
       });
 
       suggestionsBox.appendChild(listItem);
