@@ -58,8 +58,8 @@ def get_groups_not_joined_by_user(user_id):
                 SELECT group_id 
                 FROM groupsmembers 
                 WHERE user_id = %s AND invitation_status = 'Accepted'
-            )
-        """, [user_id, user_id])
+            ) AND g.admin_id != %s
+        """, [user_id, user_id, user_id])
         cols = [col[0] for col in c.description]
         groups = [dict(zip(cols, row)) for row in c.fetchall()]
     return groups
