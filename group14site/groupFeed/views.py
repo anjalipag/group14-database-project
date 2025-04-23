@@ -71,18 +71,6 @@ def group_feed(request, group_id):
 
     return render(request, 'group_feed.html', context)
 
-def check_if_in_table(title, category_id):
-    if category_id == 1: #Movies
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT * FROM Movies WHERE title = %s AND",
-                [category_name]
-            )
-            row = cursor.fetchone()
-            category_id = row[0]
-
-
-
 
 def add_recommendation(request, group_id):
     if request.method == "POST":
@@ -126,7 +114,7 @@ def add_recommendation(request, group_id):
                 )
                 recommended_item_id= cursor.fetchone()[0]
 
-                insert_into_category(category_name, external_id, recommended_item_id)
+                insert_into_category(category_name, external_id, recommended_item_id,title)
 
 
         # Insert into RecommendationPost
@@ -142,7 +130,7 @@ def add_recommendation(request, group_id):
 
     return redirect('group_feed', group_id=group_id)
 
-def insert_into_category(category_name, external_id, recommended_item_id):
+def insert_into_category(category_name, external_id, recommended_item_id, title):
     with connection.cursor() as cursor:
         if category_name == "Movies":
             movie_tbl_data = search_omdb_by_id_for_extra_info(external_id, "Movies")
@@ -154,7 +142,7 @@ def insert_into_category(category_name, external_id, recommended_item_id):
         if category_name == "TV Shows":
             movie_tbl_data = search_omdb_by_id_for_extra_info(external_id, "TV Shows")
             if not isinstance(movie_tbl_data['season_count'], int):
-                season_count = 0;
+                season_count = 0
             else:
                 season_count = movie_tbl_data['season_count']
 
@@ -162,6 +150,14 @@ def insert_into_category(category_name, external_id, recommended_item_id):
                 """INSERT INTO TVShow (director, season_count, recommended_item_id) VALUES (%s, %s, %s)""",
                 [movie_tbl_data['director'],season_count, recommended_item_id]
             )
+        if category_name == "Music":
+            music_tbl_data = search_deezer_by_id_for_extra_info(title,external_id)
+            #need to cast to type interval for our DB type check
+            duration_secs = music_tbl_data['duration']
+            mins = duration_secs // 60
+            seconds = duration_secs % 60
+            cursor.execute( """INSERT INTO Song (artist, duration, recommended_item_id) VALUES (%s, %s, %s)""",
+                [music_tbl_data['artist'],f"{mins} minutes {seconds} seconds", recommended_item_id])
 
 
 def group_detail(request, recommendation_post_id):
@@ -328,6 +324,24 @@ def search_deezer(request):
 
         return JsonResponse({'tracks': tracks})
     return JsonResponse({'error': 'Only GET allowed'}, status=405)
+
+@csrf_exempt
+def search_deezer_by_id_for_extra_info(title,external_id):
+    response = requests.get(f'https://api.deezer.com/search?q={title}')
+
+    if response.status_code != 200:
+        return JsonResponse({'error': f'Error: {response.status_code}'}), response.status_code
+
+    data = response.json()
+    result = {}
+    for item in data.get('data', []):
+        if str(item['id']) == str(external_id):
+            result = {'title': item['title'],
+                      'artist': item['artist']['name'],
+                      'duration': item['duration']}
+
+    return result
+
 
 @csrf_exempt
 def search_openlibrary(request):
