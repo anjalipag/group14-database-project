@@ -30,10 +30,13 @@
                 <a class="nav-link" href="/saved">Saved Recommendations</a>
               </li>
               <li class="nav-item">
+                <a class="nav-link" href="/reccs">My Past Recommendations</a>
+              </li>
+                <li class="nav-item">
                 <a class="nav-link" href="/group/browse">Browse Groups</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/group/create">Create Group</a>
+                <a class="nav-link" href="/group/create" style="color: white;">Create Group</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/">Logout</a>
@@ -41,11 +44,17 @@
             </ul>
           </div>
         </nav>
-
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message|escapejs }}");
+    {% endfor %}
+  </script>
+{% endif %}
 
 <div class="container-xl mt-5">
     <h1 class="mb-4">Create Group</h1>
-    <form action="{% url 'groupCreatedSuccess' %}" method="post" class="bg-light p-4 rounded shadow-sm">
+    <form action="{% url 'groupCreatedSuccess' %}" method="post" enctype="multipart/form-data" class="bg-light p-4 rounded shadow-sm">
         {% csrf_token %}
 
         <div class="mb-3">

@@ -3,40 +3,47 @@
 
 {% load static %}
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+ <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/base.css' %}" rel="stylesheet">
 
-<!-- Custom Styles -->
-<link href="{% static 'css/base.css' %}" rel="stylesheet">
-
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarText">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="/group/saved">My Groups</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/saved">Saved Recommendations</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/group/browse">Browse Groups</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/group/create">Create Group</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="/">Logout</a>
-      </li>
-    </ul>
-    </ul>
-  </div>
-</nav>
-
-<!-- Main Content -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarText">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="/group/saved">My Groups</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/saved">Saved Recommendations</a>
+              </li>
+                <li class="nav-item">
+                <a class="nav-link" href="/reccs">My Past Recommendations</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/group/browse">Browse Groups</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/group/create">Create Group</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/">Logout</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message|escapejs }}");
+    {% endfor %}
+  </script>
+{% endif %}
+<img src="{% url 'serve_group_image' group_id %}" class="card-img-top" style="width: 35%; padding-top: 15px; margin: 0 auto; display: block;" alt="Group image">
+<h2 class="mb-2 text-center" style="padding-top: 10px;">{{ group_title }}</h2>
+<h5 class="mb-2 text-center" style="padding-top: 5px; color: grey;"><em>{{ group_des }}</em></h5>
 <div class="container my-5">
   <div class="text-right mb-4">
     <button class="btn btn-success" data-toggle="modal" data-target="#recommendationModal">
@@ -72,7 +79,7 @@
                   <td>{{ post.posted_by }}</td>
                   <td>{{ post.time_stamp }}</td>
                   <td class="d-flex gap-2">
-  <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary mr-2">
+  <a href="{% url 'group_detail' post.post_id group_id %}" class="btn btn-sm btn-outline-primary mr-2">
     See More
   </a>
 <form action="{% url 'save_recc' post.post_id post.posted_by_id group_id %}" method="post" style="display:inline;">

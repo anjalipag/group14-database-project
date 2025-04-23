@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.db import connection
 
@@ -21,18 +22,39 @@ def get_groups_joined_by_user(user_id):
         cols = [col[0] for col in c.description]
         return [dict(zip(cols, row)) for row in c.fetchall()]
 
+def serve_group_image(request, group_id):
+
+    with connection.cursor() as c:
+        c.execute("SELECT group_photo FROM groups WHERE group_id = %s", [group_id])
+        row = c.fetchone()
+
+    if row and row[0]:
+        return HttpResponse(row[0], content_type='image/jpeg')  # or image/png
+    else:
+        # Fallback image
+        from django.shortcuts import redirect
+        return redirect("https://via.placeholder.com/400x200.png?text=No+Image")
+
 def get_groups_created(user_id):
     with connection.cursor() as c:
         c.execute("""
-            SELECT g.group_id, g.group_name, g.group_photo,
-                   g.admin_id AS admin_username
-            FROM groups g
-            JOIN users u ON g.admin_id = u.user_id
-            WHERE g.admin_id = %s
+            SELECT 
+            g.group_id,
+            g.group_name,
+            g.group_photo,
+            g.admin_id AS admin_username,
+            (
+                SELECT COUNT(*) 
+                FROM GroupsMembers gm 
+                WHERE gm.group_id = g.group_id 
+                  AND gm.invitation_status = 'Pending'
+            ) AS num_pending
+        FROM groups g
+        JOIN users u ON g.admin_id = u.user_id
+        WHERE g.admin_id = %s
         """, [user_id])
         cols = [col[0] for col in c.description]
         return [dict(zip(cols, row)) for row in c.fetchall()]
-
 
 def admin_view(request, group_id):
     if request.method == 'POST':

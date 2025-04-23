@@ -26,7 +26,7 @@
                 <a class="nav-link" href="/saved">Saved Recommendations</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/group/browse">Browse Groups</a>
+                <a class="nav-link" href="/group/browse" style="color: white;">Browse Groups</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/group/create">Create Group</a>
@@ -44,10 +44,8 @@
             {% for group in groups %}
             <div class="col">
                 <div class="card h-100 shadow-sm">
-                    {% if group.group_photo_url %}
-                    <img src="{{ group.group_photo_url }}" class="card-img-top" alt="{{ group.group_name }}">
-                    {% else %}
-                    <img src="https://via.placeholder.com/400x200.png?text=No+Image" class="card-img-top" alt="No image">
+                    {%if group.group_photo %}
+                        <img src="{% url 'serve_group_image' group.group_id %}" class="card-img-top" alt="Group image">
                     {% endif %}
 
                     <div class="card-body">
@@ -56,7 +54,14 @@
                         <p class="text-muted poppins-regular"><strong>Admin:</strong> {{ group.admin_username }}</p>
                     </div>
                     <div class="card-footer text-center">
-                        <a href="#" class="btn btn-primary">Join</a>
+                        {% if group.status == 0 %}
+                        <form action="{% url 'send_join_request' group.group_id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Request to Join</button>
+                        </form>
+                        {% else %}
+                        <p class="card-text poppins-regular text-danger">Request Pending</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>

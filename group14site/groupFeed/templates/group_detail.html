@@ -19,6 +19,9 @@
                 <a class="nav-link" href="/saved">Saved Recommendations</a>
               </li>
               <li class="nav-item">
+                <a class="nav-link" href="/reccs">My Past Recommendations</a>
+              </li>
+              <li class="nav-item">
                 <a class="nav-link" href="/group/browse">Browse Groups</a>
               </li>
               <li class="nav-item">
@@ -30,13 +33,25 @@
             </ul>
           </div>
         </nav>
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message|escapejs }}");
+    {% endfor %}
+  </script>
+{% endif %}
+
+<a class="nav-link" href="{% url 'group_feed' group_id %}"
+   style="font-size: 20px; font-weight: bold; padding-left: 20px; padding-top: 15px; display: inline-block; color: inherit;">
+   &#8592 Back to feed
+</a>
+
 <div class="container my-5">
 
   <!-- Post Detail -->
   <div class="card mb-5 shadow-lg">
-  <div class="card-header bg-dark text-white position-relative">
-    <h2 class="mb-0">{{ post.title }}</h2>
-
+    <div class="card-header bg-dark text-white position-relative">
+       <h2 class="mb-2">{{ post.title }}</h2>
     {% if user_id == admin_id %}
     <div class="mt-2 d-flex gap-2">
       <form method="post" action="{% url 'delete_post' post_id=post.post_id %}">

@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'browseGroups',
     'savedGroups',
     'saved',
-    'createGroups'
+    'createGroups',
+    'myReccs'
 ]
 
 MIDDLEWARE = [

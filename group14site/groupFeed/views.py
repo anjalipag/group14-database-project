@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.db import connection
 from datetime import datetime
 from django.urls import reverse
+from django.contrib import messages
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -49,6 +50,10 @@ def group_feed(request, group_id):
         WHERE rp.group_id = %s
         ORDER BY c.category_name, rp.time_stamp DESC""", [group_id])
         rows = cursor.fetchall()
+        cursor.execute("SELECT group_name FROM Groups WHERE group_id = %s", [group_id])
+        group_title = cursor.fetchone()[0]
+        cursor.execute("SELECT group_description FROM Groups WHERE group_id = %s", [group_id])
+        group_des = cursor.fetchone()[0]
 
     for row in rows:
         category_name = row[0]
@@ -78,6 +83,8 @@ def group_feed(request, group_id):
 
     context = {
         'group_id': group_id,
+        'group_title': group_title,
+        'group_des': group_des,
         'total_posts': total_post_count,
         'category_posts': post_by_category,
         'category_names': category_names,
@@ -85,9 +92,157 @@ def group_feed(request, group_id):
         'user_id':request.session.get('user_id'),
     }
 
-
-
     return render(request, 'group_feed.html', context)
+
+def serve_group_image(request, group_id):
+
+    with connection.cursor() as c:
+        c.execute("SELECT group_photo FROM groups WHERE group_id = %s", [group_id])
+        row = c.fetchone()
+
+    if row and row[0]:
+        return HttpResponse(row[0], content_type='image/jpeg')  # or image/png
+    else:
+        # Fallback image
+        from django.shortcuts import redirect
+        return redirect("https://via.placeholder.com/400x200.png?text=No+Image")
+
+def group_detail(request, recommendation_post_id, group_id = None):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT
+                c.category_name,
+                rp.recommendation_post_id,
+                rp.description,
+                rp.up_vote_count,
+                rp.down_vote_count,
+                rp.overall_rating,
+                rp.extra_info,
+                rp.time_stamp,
+                ri.title,
+                u.username,
+                rp.user_id
+            FROM RecommendationPost rp
+            JOIN RecommendedItem ri ON rp.recommended_item_id = ri.recommended_item_id
+            JOIN Category c ON ri.category_id = c.category_id
+            JOIN Users u ON rp.user_id = u.user_id
+            WHERE rp.recommendation_post_id = %s
+            """, [recommendation_post_id])
+        row = cursor.fetchone()
+        extra_info = get_extra_info(recommendation_post_id)
+        post_data = {
+            'post_id': row[1],
+            'description': row[2],
+            'up_vote_count': row[3],
+            'down_vote_count': row[4],
+            'overall_rating': row[5],
+            'extra_info': row[6],
+            'time_stamp': row[7],
+            'title': row[8],
+            'posted_by': row[9],
+            'category_name': row[0],
+            'posted_by_id': row[10],
+            'extra_info': extra_info
+        }
+
+        all_comments =[]
+        cursor.execute("""
+                    SELECT
+                        c.comment_id,
+                        c.comment_text,
+                        c.time_posted,
+                        u.username
+                    FROM Comment c 
+                    JOIN Users u ON c.user_id = u.user_id
+                    WHERE c.recommendation_post_id = %s
+                    """, [recommendation_post_id])
+        rows = cursor.fetchall()
+        for row in rows:
+            comment_data = {
+                'comment_id' : row[0],
+                'comment_text': row[1],
+                'time_posted': row[2],
+                'posted_by': row[3]
+            }
+            all_comments.append(comment_data)
+
+    # print("all_comments", all_comments)
+    #Get admin ID for delete admin perms
+        cursor.execute("SELECT group_id FROM RecommendationPost WHERE recommendation_post_id = %s", [recommendation_post_id])
+        group_id = cursor.fetchone()[0]
+        cursor.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
+        admin_id = cursor.fetchone()[0]
+
+    context = {
+        'recommendation_post_id': recommendation_post_id,
+        'post': post_data,
+        'comments_for_post': all_comments,
+        'admin_id': admin_id,
+        'user_id':request.session.get('user_id'),
+        'group_id': group_id
+    }
+
+    return render(request, 'group_detail.html', context)
+
+def get_extra_info(recommendation_post_id):
+    with connection.cursor() as c:
+        #first find category (as category determines the extra info type)
+        c.execute("""SELECT c.category_name, ri.recommended_item_id FROM RecommendationPost rp JOIN RecommendedItem ri ON rp.recommended_item_id = ri.recommended_item_id JOIN Category c ON ri.category_id = c.category_id WHERE rp.recommendation_post_id = %s""", [recommendation_post_id])
+
+        row = c.fetchone()
+
+        if not row:
+            return {}
+
+        category_name, recommendation_item_id = row
+
+        #need to get data from appropriate table (based on rec id and category)
+        if category_name == "Movies":
+            c.execute("""SELECT director, duration, rated, plot FROM Movie WHERE recommended_item_id = %s""", [recommendation_item_id])
+            result = c.fetchone()
+            if result:
+                return {'Director': result[0], 'Duration': result[1], 'Rated': result[2], 'Plot': result[3]}
+        elif category_name == "TV Shows":
+            c.execute("""SELECT director, season_count, rated, plot FROM TVShow WHERE recommended_item_id = %s""",
+                      [recommendation_item_id])
+            result = c.fetchone()
+            if result:
+                return {'Director': result[0], 'Season Count': result[1], 'Rated': result[2], 'Plot': result[3]}
+        elif category_name == "Music":
+            c.execute("""SELECT artist, duration, album FROM Song WHERE recommended_item_id = %s""",
+                      [recommendation_item_id])
+            result = c.fetchone()
+            if result:
+                return {'Artist': result[0], 'Duration': result[1], 'Album': result[2]}
+        elif category_name == "Books":
+            c.execute("""SELECT author, year_published FROM Book WHERE recommended_item_id = %s""",
+                      [recommendation_item_id])
+            result = c.fetchone()
+            if result:
+                return {'Author': result[0], 'Year Published': result[1]}
+    return {}
+
+def save_recc(request, recommendation_post_id, posted_by_id, group_id):
+    if request.method == 'POST':
+        user_saved_id = request.session.get('user_id')
+        print("RECC ID", recommendation_post_id)
+        date_saved = datetime.now()
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+            SELECT * FROM SavedRecommendations WHERE user_saved_id = %s AND recommendation_id = %s""",
+                           [user_saved_id, recommendation_post_id])
+            rows = cursor.fetchall()
+            number_of_rows = len(rows)
+
+        if number_of_rows == 0:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO SavedRecommendations (date_saved, user_posted_id, user_saved_id, recommendation_id)
+                    VALUES (%s, %s, %s, %s)
+                """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
+    messages.success(request, "Successfully saved recommendation!")
+    return redirect('group_feed', group_id=group_id)
 
 
 def add_recommendation(request, group_id):
@@ -179,141 +334,6 @@ def insert_into_category(category_name, external_id, recommended_item_id, title)
                            [books_tbl_data['author'], books_tbl_data['year_published'], recommended_item_id])
 
 
-def group_detail(request, recommendation_post_id):
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT
-                c.category_name,
-                rp.recommendation_post_id,
-                rp.description,
-                rp.up_vote_count,
-                rp.down_vote_count,
-                rp.overall_rating,
-                rp.extra_info,
-                rp.time_stamp,
-                ri.title,
-                u.username,
-                rp.user_id
-            FROM RecommendationPost rp
-            JOIN RecommendedItem ri ON rp.recommended_item_id = ri.recommended_item_id
-            JOIN Category c ON ri.category_id = c.category_id
-            JOIN Users u ON rp.user_id = u.user_id
-            WHERE rp.recommendation_post_id = %s
-            """, [recommendation_post_id])
-        row = cursor.fetchone()
-        extra_info = get_extra_info(recommendation_post_id)
-        post_data = {
-            'post_id': row[1],
-            'description': row[2],
-            'up_vote_count': row[3],
-            'down_vote_count': row[4],
-            'overall_rating': row[5],
-            'extra_info': row[6],
-            'time_stamp': row[7],
-            'title': row[8],
-            'posted_by': row[9],
-            'category_name': row[0],
-            'posted_by_id': row[10],
-            'extra_info': extra_info
-        }
-
-        all_comments =[]
-        cursor.execute("""
-                    SELECT
-                        c.comment_id,
-                        c.comment_text,
-                        c.time_posted,
-                        u.username
-                    FROM Comment c 
-                    JOIN Users u ON c.user_id = u.user_id
-                    WHERE c.recommendation_post_id = %s
-                    """, [recommendation_post_id])
-        rows = cursor.fetchall()
-        for row in rows:
-            comment_data = {
-                'comment_id' : row[0],
-                'comment_text': row[1],
-                'time_posted': row[2],
-                'posted_by': row[3]
-            }
-            all_comments.append(comment_data)
-
-    # print("all_comments", all_comments)
-    #Get admin ID for delete admin perms
-        cursor.execute("SELECT group_id FROM RecommendationPost WHERE recommendation_post_id = %s", [recommendation_post_id])
-        group_id = cursor.fetchone()[0]
-        cursor.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
-        admin_id = cursor.fetchone()[0]
-
-    context = {
-        'recommendation_post_id': recommendation_post_id,
-        'post': post_data,
-        'comments_for_post': all_comments,
-        'admin_id': admin_id,
-        'user_id':request.session.get('user_id'),
-    }
-
-    return render(request, 'group_detail.html', context)
-def get_extra_info(recommendation_post_id):
-    with connection.cursor() as c:
-        #first find category (as category determines the extra info type)
-        c.execute("""SELECT c.category_name, ri.recommended_item_id FROM RecommendationPost rp JOIN RecommendedItem ri ON rp.recommended_item_id = ri.recommended_item_id JOIN Category c ON ri.category_id = c.category_id WHERE rp.recommendation_post_id = %s""", [recommendation_post_id])
-
-        row = c.fetchone()
-
-        if not row:
-            return {}
-
-        category_name, recommendation_item_id = row
-
-        #need to get data from appropriate table (based on rec id and category)
-        if category_name == "Movies":
-            c.execute("""SELECT director, duration, rated, plot FROM Movie WHERE recommended_item_id = %s""", [recommendation_item_id])
-            result = c.fetchone()
-            if result:
-                return {'Director': result[0], 'Duration': result[1], 'Rated': result[2], 'Plot': result[3]}
-        elif category_name == "TV Shows":
-            c.execute("""SELECT director, season_count, rated, plot FROM TVShow WHERE recommended_item_id = %s""",
-                      [recommendation_item_id])
-            result = c.fetchone()
-            if result:
-                return {'Director': result[0], 'Season Count': result[1], 'Rated': result[2], 'Plot': result[3]}
-        elif category_name == "Music":
-            c.execute("""SELECT artist, duration, album FROM Song WHERE recommended_item_id = %s""",
-                      [recommendation_item_id])
-            result = c.fetchone()
-            if result:
-                return {'Artist': result[0], 'Duration': result[1], 'Album': result[2]}
-        elif category_name == "Books":
-            c.execute("""SELECT author, year_published FROM Book WHERE recommended_item_id = %s""",
-                      [recommendation_item_id])
-            result = c.fetchone()
-            if result:
-                return {'Author': result[0], 'Year Published': result[1]}
-    return {}
-
-def save_recc(request, recommendation_post_id, posted_by_id, group_id):
-    if request.method == 'POST':
-        user_saved_id = request.session.get('user_id')
-        print("RECC ID", recommendation_post_id)
-        date_saved = datetime.now()
-
-        with connection.cursor() as cursor:
-            cursor.execute("""
-            SELECT * FROM SavedRecommendations WHERE user_saved_id = %s AND recommendation_id = %s""",
-                           [user_saved_id, recommendation_post_id])
-            rows = cursor.fetchall()
-            number_of_rows = len(rows)
-
-        if number_of_rows == 0:
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO SavedRecommendations (date_saved, user_posted_id, user_saved_id, recommendation_id)
-                    VALUES (%s, %s, %s, %s)
-                """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
-    return redirect('group_feed', group_id=group_id)
-
-
 def save_recc_det(request, recommendation_post_id, posted_by_id):
     if request.method == 'POST':
         user_saved_id = request.session.get('user_id')
@@ -334,8 +354,7 @@ def save_recc_det(request, recommendation_post_id, posted_by_id):
                     VALUES (%s, %s, %s, %s)
                 """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
 
-
-
+    messages.success(request, "Successfully saved recommendation!")
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
 
 
@@ -524,16 +543,23 @@ def search_openlibrary(request):
 def search_openlibrary_by_id_for_extra_info(title,external_id):
     response = requests.get(f'https://openlibrary.org/search.json?q={title}')
 
+
     if response.status_code != 200:
         return JsonResponse({'error': f'Error: {response.status_code}'}), response.status_code
 
     data = response.json()
     result = {}
+
     for doc in data.get('docs', [])[:10]:  # Limit to 10 results
         if external_id in doc.get('author_key', []):
+            author = ', '.join(doc.get('author_name', [])),
+            if ',' in author:
+                author = author.split(',')[0].strip()
+            else:
+                author = ', '.join(doc.get('author_name', [])),
             result = {
                 'title': doc.get('title'),
-                'author': ', '.join(doc.get('author_name', [])),
+                'author': author,
                 'year_published': doc.get('first_publish_year')
             }
 

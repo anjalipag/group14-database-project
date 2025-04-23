@@ -17,10 +17,13 @@
           <div class="collapse navbar-collapse" id="navbarText">
             <ul class="navbar-nav mr-auto">
               <li class="nav-item active">
-                <a class="nav-link" href="/group/saved">My Groups</a>
+                <a class="nav-link" href="/group/saved" style="color: white;">My Groups</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/saved">Saved Recommendations</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/reccs">My Past Recommendations</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/group/browse">Browse Groups</a>
@@ -35,7 +38,7 @@
           </div>
         </nav>
 
-  <div class="d-flex flex-column vh-100">
+  <div class="container py-4">
     <!-- Top Half: Created Groups -->
     <div class="flex-fill overflow-auto border-bottom">
       <div class="container mt-4">
@@ -44,10 +47,9 @@
           {% for group in groups_created %}
             <div class="col">
               <div class="card h-100">
-                {% if group.photo_url %}
-                  <img src="{{ group.photo_url }}" class="card-img-top" alt="{{ group.group_name }}">
-                {% else %}
-                  <img src="https://via.placeholder.com/400x200.png?text=No+Image" class="card-img-top" alt="No image">
+
+                {%if group.group_photo %}
+                  <img src="{% url 'serve_group_image' group.group_id %}" class="card-img-top" style="height:200px; object-fit:cover;"alt="Group image">
                 {% endif %}
                 <div class="card-body">
                   <h5 class="card-title">{{ group.group_name }}</h5>
@@ -57,6 +59,7 @@
                     <a href="{% url 'group_feed' group.group_id %}" class="btn btn-primary mb-2">View Group</a>
                   </br>
                    <a href="{% url 'admin_view' group.group_id %}" class="btn btn-info" >Manage Members/Requests</a>
+                    <p class="card-text">{{ group.num_pending }} Pending Requests</p>
                 </div>
               </div>
             </div>
@@ -75,10 +78,8 @@
           {% for group in groups %}
             <div class="col">
               <div class="card h-100">
-                {% if group.photo_url %}
-                  <img src="{{ group.photo_url }}" class="card-img-top" alt="{{ group.group_name }}">
-                {% else %}
-                  <img src="https://via.placeholder.com/400x200.png?text=No+Image" class="card-img-top" alt="No image">
+                {%if group.group_photo %}
+                  <img src="{% url 'serve_group_image' group.group_id %}" class="card-img-top" style="height:200px; object-fit:cover;" alt="Group image">
                 {% endif %}
                 <div class="card-body">
                   <h5 class="card-title">{{ group.group_name }}</h5>
