@@ -63,15 +63,15 @@ def admin_view(request, group_id):
             c.execute("""DELETE FROM GroupsMembers WHERE group_id = %s AND user_id = %s""", [group_id, uid_to_remove])
         return redirect('admin_view', group_id=group_id)
 
-    group_members = get_group_members(group_id)
+    group_members = get_group_members(group_id,request.session.get('user_id'))
     group_name = get_group_name(group_id)
     return render(request, 'admin_view.html', {'group_id': group_id, 'group_name': group_name, 'group_members': group_members})
 
-def get_group_members(group_id):
+def get_group_members(group_id, current_user):
     with connection.cursor() as c:
         c.execute("""
                SELECT * FROM groupsmembers gm JOIN users u ON gm.user_id = u.user_id WHERE gm.group_id = %s AND gm.invitation_status = 'Accepted'
-           """, [group_id])
+           AND u.user_id != %s""", [group_id, current_user])
         cols = [col[0] for col in c.description]
         return [dict(zip(cols, row)) for row in c.fetchall()]
 
