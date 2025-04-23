@@ -38,6 +38,16 @@
             </ul>
           </div>
         </nav>
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message|escapejs }}");
+    {% endfor %}
+  </script>
+{% endif %}
+<img src="{% url 'serve_group_image' group_id %}" class="card-img-top" style="width: 35%; padding-top: 15px; margin: 0 auto; display: block;" alt="Group image">
+<h2 class="mb-2 text-center" style="padding-top: 10px;">{{ group_title }}</h2>
+<h5 class="mb-2 text-center" style="padding-top: 5px; color: grey;"><em>{{ group_des }}</em></h5>
 <div class="container my-5">
   {% for category, posts in category_posts.items %}
     <div class="card mb-5 shadow-sm">
@@ -67,7 +77,7 @@
                   <td>{{ post.posted_by }}</td>
                   <td>{{ post.time_stamp }}</td>
                   <td class="d-flex gap-2">
-  <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary mr-2">
+  <a href="{% url 'group_detail' post.post_id group_id %}" class="btn btn-sm btn-outline-primary mr-2">
     See More
   </a>
 <form action="{% url 'save_recc' post.post_id post.posted_by_id group_id %}" method="post" style="display:inline;">

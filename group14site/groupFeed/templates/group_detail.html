@@ -35,6 +35,19 @@
             </ul>
           </div>
         </nav>
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      alert("{{ message|escapejs }}");
+    {% endfor %}
+  </script>
+{% endif %}
+
+<a class="nav-link" href="{% url 'group_feed' group_id %}"
+   style="font-size: 20; font-weight: bold; padding-left: 20px; padding-top: 15px; display: inline-block; color: inherit;">
+   &#8592 Back to feed
+</a>
+
 <div class="container my-5">
 
   <!-- Post Detail -->
@@ -47,7 +60,6 @@
     </form>
     </div>
     <div class="card-header bg-dark text-white position-relative">
-    <h2 class="mb-0">{{ post.title }}</h2>
     {% if user_id == admin_id %}
       <form method="post" action="{% url 'delete_post' post_id=post.post_id %}" class="position-absolute" style="top: 10px; right: 10px;">
         {% csrf_token %}

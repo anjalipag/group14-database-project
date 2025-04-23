@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.db import connection
 from datetime import datetime
 from django.urls import reverse
+from django.contrib import messages
 
 # chatGPT was used to understand how to use connection.cursor() and understand POST without model forms
 def index(request):
@@ -23,7 +24,6 @@ def group_feed(request, group_id):
         #get admin id for later to check if someone has admin permissions
         cursor.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
         admin_id = cursor.fetchone()[0]
-
 
         cursor.execute("""
         SELECT
@@ -45,6 +45,10 @@ def group_feed(request, group_id):
         WHERE rp.group_id = %s
         ORDER BY c.category_name, rp.time_stamp DESC""", [group_id])
         rows = cursor.fetchall()
+        cursor.execute("SELECT group_name FROM Groups WHERE group_id = %s", [group_id])
+        group_title = cursor.fetchone()[0]
+        cursor.execute("SELECT group_description FROM Groups WHERE group_id = %s", [group_id])
+        group_des = cursor.fetchone()[0]
 
     for row in rows:
         category_name = row[0]
@@ -66,6 +70,8 @@ def group_feed(request, group_id):
 
     context = {
         'group_id': group_id,
+        'group_title': group_title,
+        'group_des': group_des,
         'total_posts': total_post_count,
         'category_posts': post_by_category,
         'admin_id': admin_id,
@@ -74,7 +80,20 @@ def group_feed(request, group_id):
 
     return render(request, 'group_feed.html', context)
 
-def group_detail(request, recommendation_post_id):
+def serve_group_image(request, group_id):
+
+    with connection.cursor() as c:
+        c.execute("SELECT group_photo FROM groups WHERE group_id = %s", [group_id])
+        row = c.fetchone()
+
+    if row and row[0]:
+        return HttpResponse(row[0], content_type='image/jpeg')  # or image/png
+    else:
+        # Fallback image
+        from django.shortcuts import redirect
+        return redirect("https://via.placeholder.com/400x200.png?text=No+Image")
+
+def group_detail(request, recommendation_post_id, group_id=None):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
@@ -144,6 +163,7 @@ def group_detail(request, recommendation_post_id):
         'comments_for_post': all_comments,
         'admin_id': admin_id,
         'user_id':request.session.get('user_id'),
+        'group_id': group_id
     }
 
     return render(request, 'group_detail.html', context)
@@ -167,6 +187,7 @@ def save_recc(request, recommendation_post_id, posted_by_id, group_id):
                     INSERT INTO SavedRecommendations (date_saved, user_posted_id, user_saved_id, recommendation_id)
                     VALUES (%s, %s, %s, %s)
                 """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
+    messages.success(request, "Successfully saved recommendation!")
     return redirect('group_feed', group_id=group_id)
 
 
@@ -190,8 +211,7 @@ def save_recc_det(request, recommendation_post_id, posted_by_id):
                     VALUES (%s, %s, %s, %s)
                 """, [date_saved, posted_by_id, user_saved_id, recommendation_post_id])
 
-
-
+    messages.success(request, "Successfully saved recommendation!")
     return redirect('group_detail', recommendation_post_id=recommendation_post_id)
 
 
