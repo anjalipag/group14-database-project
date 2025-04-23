@@ -35,11 +35,11 @@
           </div>
         </nav>
 {% if messages %}
+  {% for message in messages %}
   <script>
-    {% for message in messages %}
       alert("{{ message|escapejs }}");
-    {% endfor %}
   </script>
+   {% endfor %}
 {% endif %}
 <img src="{% url 'serve_group_image' group_id %}" class="card-img-top" style="width: 35%; padding-top: 15px; margin: 0 auto; display: block;" alt="Group image">
 <h2 class="mb-2 text-center" style="padding-top: 10px;">{{ group_title }}</h2>
@@ -151,7 +151,7 @@
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" id="submit_rec_btn" class="btn btn-primary">Submit</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </form>
@@ -168,6 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const titleInput = document.getElementById('title');
   const categorySelect = document.getElementById('category_name');
   const suggestionsBox = document.getElementById('title-suggestions');
+  const submitButton = document.getElementById('submit_rec_btn');
+  submitButton.disabled = true; //We only want to submit if our api can get the necessary info
 
   let typingTimer;
   const debounceDelay = 300;
@@ -185,25 +187,68 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (category.includes('music') || category.includes('song')) {
         fetch(`/group/feed/search/?query=${encodeURIComponent(query)}`)
-          .then(res => res.json())
-          .then(data => showSuggestions(data.tracks || [], 'music'))
-          .catch(err => console.error(err));
+                .then(res => res.json())
+                .then(data => {
+                  if(data.tracks && data.tracks.length >0){
+                  showSuggestions(data.tracks || [], 'music');
+                  submitButton.disabled = false;
+                } else {
+                    submitButton.disabled = true;
+                    suggestionsBox.innerHTML = `<div class = "list-group-item text-muted">No matches found to recommend on.</div>`;
+                  }
+                 })
+                .catch(err => {
+                    console.error(err);
+                    submitButton.disabled = true;
+                });
       } else if (category.includes('book')) {
         fetch(`/group/feed/search_books/?query=${encodeURIComponent(query)}`)
           .then(res => res.json())
-          .then(data => showSuggestions(data.books || [], 'book'))
-          .catch(err => console.error(err));
+          .then(data => {
+            if(data.books && data.books.length > 0){
+              showSuggestions(data.books || [], 'book');
+              submitButton.disabled = false;
+            } else{
+              submitButton.disabled = true;
+              suggestionsBox.innerHTML= `<div class = "list-group-item text-muted">No matches found to recommend on.</div>`;
+            }
+                  })
+          .catch(err => {
+                    console.error(err);
+                    submitButton.disabled = true;
+                });
       } else if (category.includes('movie')) {
         fetch(`/group/feed/search_movies/?query=${encodeURIComponent(query)}`)
           .then(res => res.json())
-          .then(data => showSuggestions(data.movies || [], 'movie'))
-          .catch(err => console.error(err));
-      }
-      else if (category.includes('show')) {
+          .then(data => {
+            if (data.movies && data.movies.length >0){
+            showSuggestions(data.movies || [], 'movie');
+            submitButton.disabled = false;
+          } else{
+            submitButton.disabled=true;
+            suggestionsBox.innerHTML= `<div class = "list-group-item text-muted">No matches found to recommend on.</div>`;
+        }
+          })
+          .catch(err => {
+                    console.error(err);
+                    submitButton.disabled = true;
+                });
+    } else if (category.includes('show')) {
         fetch(`/group/feed/search_shows/?query=${encodeURIComponent(query)}`)
           .then(res => res.json())
-          .then(data => showSuggestions(data.shows || [], 'show'))
-          .catch(err => console.error(err));
+          .then(data => {
+            if(data.shows && data.shows.length > 0){
+              showSuggestions(data.shows || [], 'show');
+              submitButton.disabled = false;
+            } else{
+              submitButton.disabled = true;
+              suggestionsBox.innerHTML= `<div class = "list-group-item text-muted">No matches found to recommend on.</div>`;
+            }
+          })
+          .catch(err => {
+                    console.error(err);
+                    submitButton.disabled = true;
+                });
       }
 
       else {
