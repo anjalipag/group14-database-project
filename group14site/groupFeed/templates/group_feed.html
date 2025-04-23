@@ -1,4 +1,5 @@
-<!-- ChatGPT was used to style this page to make it look aesthetic -->
+
+<!-- ChatGPT was used to style this page to make it look asthetic -->
 
 {% load static %}
 
@@ -57,7 +58,8 @@
                 <th scope="col">Rating</th>
                 <th scope="col">Posted By</th>
                 <th scope="col">Posted At</th>
-                <th scope="col">View More</th>
+                <th scope="col">Discover & Save</th>
+                <th scope="col"> </th>
               </tr>
             </thead>
             <tbody class="poppins-regular">
@@ -68,8 +70,24 @@
                   <td>{{ post.overall_rating }}</td>
                   <td>{{ post.posted_by }}</td>
                   <td>{{ post.time_stamp }}</td>
+                  <td class="d-flex gap-2">
+  <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary mr-2">
+    See More
+  </a>
+<form action="{% url 'save_recc' post.post_id post.posted_by_id group_id %}" method="post" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-sm btn-success">Save</button>
+</form>
+
+</td>
                   <td>
-                    <a href="{% url 'group_detail' post.post_id %}" class="btn btn-sm btn-outline-primary">See More</a>
+
+                    {% if user_id == admin_id %}
+                      <form method="POST" action="{% url 'delete_post' post.post_id %}" class="d-inline" onsubmit="return confirmDelete();">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger" style="color:red; background-color:white; border:2px solid red;">Delete Post</button>
+                      </form>
+                    {% endif %}
                   </td>
                 </tr>
               {% endfor %}

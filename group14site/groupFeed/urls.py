@@ -12,4 +12,11 @@ urlpatterns = [
     path('search_books/', views.search_openlibrary, name='search_openlibrary'),
     path('search_movies/', views.search_omdb_movies, name='search_omdb_movies'),
     path('search_shows/', views.search_omdb_shows, name='search_omdb_shows'),
+    path('saved/<int:recommendation_post_id>/<int:posted_by_id>/<int:group_id>', views.save_recc,
+         name='save_recc'),
+    path('saved/detail/<int:recommendation_post_id>/<int:posted_by_id>/', views.save_recc_det, name='save_recc_det'),
+
+    path('group/delete/<int:post_id>/', views.delete_post, name='delete_post'),
+    path('comment/delete/<int:comment_id>/<int:post_id>/', views.admin_delete_comment, name='admin_delete_comment'),
+
 ]
