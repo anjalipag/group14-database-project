@@ -159,6 +159,11 @@ def insert_into_category(category_name, external_id, recommended_item_id, title)
             cursor.execute( """INSERT INTO Song (artist, duration, recommended_item_id) VALUES (%s, %s, %s)""",
                 [music_tbl_data['artist'],f"{mins} minutes {seconds} seconds", recommended_item_id])
 
+        if category_name == "Books":
+            books_tbl_data = search_openlibrary_by_id_for_extra_info(title, external_id)
+            cursor.execute("""INSERT INTO Book (author, year_published, recommended_item_id) VALUES (%s, %s, %s)""",
+                           [books_tbl_data['author'], books_tbl_data['year_published'], recommended_item_id])
+
 
 def group_detail(request, recommendation_post_id):
     with connection.cursor() as cursor:
@@ -365,6 +370,27 @@ def search_openlibrary(request):
 
         return JsonResponse({'books': books})
     return JsonResponse({'error': 'Only GET allowed'}, status=405)
+
+@csrf_exempt
+def search_openlibrary_by_id_for_extra_info(title,external_id):
+    response = requests.get(f'https://openlibrary.org/search.json?q={title}')
+
+    if response.status_code != 200:
+        return JsonResponse({'error': f'Error: {response.status_code}'}), response.status_code
+
+    data = response.json()
+    result = {}
+    for doc in data.get('docs', [])[:10]:  # Limit to 10 results
+        if external_id in doc.get('author_key', []):
+            result = {
+                'title': doc.get('title'),
+                'author': ', '.join(doc.get('author_name', [])),
+                'year_published': doc.get('first_publish_year')
+            }
+
+
+    return result
+
 
 
 @csrf_exempt
