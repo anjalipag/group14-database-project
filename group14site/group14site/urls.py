@@ -28,4 +28,5 @@ urlpatterns = [
     # path("/", views.add_comment, name="add_comment"),
     path("", views.index, name="index"),
     path('admin/', admin.site.urls),
+    path("reccs/", include("myReccs.urls")),
 ]
