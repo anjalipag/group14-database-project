@@ -143,8 +143,8 @@ def insert_into_category(category_name, external_id, recommended_item_id, title)
             tv_show_data = search_omdb_by_id_for_extra_info(external_id, "TV Shows")
 
             cursor.execute(
-                """INSERT INTO TVShow (director, season_count, recommended_item_id) VALUES (%s, %s, %s)""",
-                [tv_show_data['director'], tv_show_data['season_count'], recommended_item_id]
+                """INSERT INTO TVShow (director, season_count, recommended_item_id, rated, plot) VALUES (%s, %s, %s, %s, %s)""",
+                [tv_show_data['director'], tv_show_data['season_count'], recommended_item_id,  tv_show_data['rated'], tv_show_data['plot']]
             )
         if category_name == "Music":
             music_tbl_data = search_deezer_by_id_for_extra_info(title,external_id)
@@ -245,11 +245,11 @@ def get_extra_info(recommendation_post_id):
             if result:
                 return {'Director': result[0], 'Duration': result[1], 'Rated': result[2], 'Plot': result[3]}
         elif category_name == "TV Shows":
-            c.execute("""SELECT director, season_count FROM TVShow WHERE recommended_item_id = %s""",
+            c.execute("""SELECT director, season_count, rated, plot FROM TVShow WHERE recommended_item_id = %s""",
                       [recommendation_item_id])
             result = c.fetchone()
             if result:
-                return {'Director': result[0], 'Season Count': result[1]}
+                return {'Director': result[0], 'Season Count': result[1], 'Rated': result[2], 'Plot': result[3]}
         elif category_name == "Music":
             c.execute("""SELECT artist, duration FROM Song WHERE recommended_item_id = %s""",
                       [recommendation_item_id])
@@ -507,7 +507,10 @@ def search_omdb_by_id_for_extra_info(imdbid, category):
             director = data.get('Director')
         result = {'title': data.get('Title'),
                 'director': director,
-                'season_count': data.get('totalSeasons')}
+                'season_count': data.get('totalSeasons'),
+                  'rated': data.get('Rated'),
+                  'plot': data.get('Plot')
+                  }
 
 
     return result
