@@ -21,7 +21,7 @@
                 <a class="nav-link" href="/saved">Saved Recommendations</a>
               </li>
                 <li class="nav-item active">
-                <a class="nav-link" href="/reccs">My Past Recommendations (current)</a>
+                <a class="nav-link" href="/reccs">My Past Recommendations</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/group/browse">Browse Groups</a>
@@ -35,8 +35,9 @@
             </ul>
           </div>
         </nav>
-<a href="javascript:history.back()" class="btn btn-outline-secondary mb-4">
-  ← Back
+<a class="nav-link" href="{% url 'user_recommendations' %}"
+   style="font-size: 20px; font-weight: bold; padding-left: 20px; padding-top: 15px; display: inline-block; color: inherit;">
+   &#8592 Back to My Past Recommendations
 </a>
 
 <!-- Comments Section -->
