@@ -21,7 +21,7 @@
 #     up_vote_count = models.IntegerField()
 #     down_vote_count = models.IntegerField()
 #     overall_rating = models.IntegerField()
-#     extra_info = models.TextField()
+
 #     time_stamp = models.DateTimeField()
 #
 #     class Meta:

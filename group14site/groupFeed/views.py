@@ -50,7 +50,6 @@ def group_feed(request, group_id):
             rp.up_vote_count,
             rp.down_vote_count,
             rp.overall_rating,
-            rp.extra_info,
             rp.time_stamp,
             ri.title,
             u.username,
@@ -75,11 +74,10 @@ def group_feed(request, group_id):
             'up_vote_count': row[3],
             'down_vote_count': row[4],
             'overall_rating': row[5],
-            'extra_info': row[6],
-            'time_stamp': row[7],
-            'title': row[8],
-            'posted_by': row[9],
-            'posted_by_id': row[10],
+            'time_stamp': row[6],
+            'title': row[7],
+            'posted_by': row[8],
+            'posted_by_id': row[9]
         }
 
         # https://stackoverflow.com/questions/35918831/dict-setdefault-appends-one-extra-default-item-into-the-value-list
@@ -129,7 +127,6 @@ def group_detail(request, recommendation_post_id, group_id = None):
                 rp.up_vote_count,
                 rp.down_vote_count,
                 rp.overall_rating,
-                rp.extra_info,
                 rp.time_stamp,
                 ri.title,
                 u.username,
@@ -148,12 +145,11 @@ def group_detail(request, recommendation_post_id, group_id = None):
             'up_vote_count': row[3],
             'down_vote_count': row[4],
             'overall_rating': row[5],
-            'extra_info': row[6],
-            'time_stamp': row[7],
-            'title': row[8],
-            'posted_by': row[9],
+            'time_stamp': row[6],
+            'title': row[7],
+            'posted_by': row[8],
             'category_name': row[0],
-            'posted_by_id': row[10],
+            'posted_by_id': row[9],
             'extra_info': extra_info
         }
 
@@ -264,7 +260,7 @@ def add_recommendation(request, group_id):
         title = request.POST.get('title')
         description = request.POST.get('description')
         overall_rating = request.POST.get('overall_rating')
-        extra_info = request.POST.get('extra_info')
+        # extra_info = request.POST.get('extra_info')
         time_stamp = datetime.now()
         up_vote_count = 0
         down_vote_count = 0
@@ -307,10 +303,10 @@ def add_recommendation(request, group_id):
             cursor.execute(
                 """
                 INSERT INTO RecommendationPost
-                (user_id, group_id, recommended_item_id, description, up_vote_count, down_vote_count, overall_rating, extra_info, time_stamp)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (user_id, group_id, recommended_item_id, description, up_vote_count, down_vote_count, overall_rating, time_stamp)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                [user_id, group_id, recommended_item_id, description, up_vote_count, down_vote_count, overall_rating, extra_info, time_stamp]
+                [user_id, group_id, recommended_item_id, description, up_vote_count, down_vote_count, overall_rating, time_stamp]
             )
 
     return redirect('group_feed', group_id=group_id)
