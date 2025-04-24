@@ -109,6 +109,11 @@ def group_feed(request, group_id):
         'user_id':request.session.get('user_id'),
     }
 
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT group_name, total_posts, total_users FROM MostPopularGroups")
+
+        popular_groups = cursor.fetchall()
+
     return render(request, 'group_feed.html', context)
 
 def serve_group_image(request, group_id):
