@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- CHATGPT used for UI placement and aesthetic organization -->
     <title>Browse Groups</title>
     {% load static %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -43,6 +44,27 @@
         </nav>
     <div class="container py-5">
         <h1 class="mb-4 text-center">Browse Groups</h1>
+  {% if popular_groups %}
+    <div class="container mb-5">
+        <h4 class="mb-4 text-center fw-semibold poppins-regular" style="font-size: 1.5rem; color: #343a40;">Top 3 Most Popular Groups</h4>
+        <div class="row justify-content-center">
+            {% for group in popular_groups %}
+            <div class="col-10 col-sm-6 col-md-4 mb-3">
+                <div class="popular-card bg-light-subtle text-dark shadow-sm rounded-3 p-3 h-100" style=" background-color: #f1f3f5;border: 2px solid darkgray;border-radius: 1rem;">
+                    <h6 class="fw-bold mb-2 text-dark text-center">{{ group.0 }}</h6>
+                    <p class="mb-1 text-center small">
+                        {{ group.1 }} posts
+                    </p>
+                    <p class="mb-0 text-muted text-center small">
+                        {{ group.2 }} members
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for group in groups %}

@@ -5,8 +5,12 @@ from django.db import connection
 def browse_groups(request):
     user_id = request.session.get('user_id')
     groups = get_groups_not_joined_by_user(user_id)
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT group_name, total_posts, total_users FROM MostPopularGroups")
 
-    return render(request, 'browse_groups.html', {'groups': groups})
+        popular_groups = cursor.fetchall()
+
+    return render(request, 'browse_groups.html', {'groups': groups, "popular_groups": popular_groups})
 
 def send_join_request(request, group_id):
     if request.method == 'POST':
