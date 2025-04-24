@@ -13,8 +13,11 @@ def browse_groups(request):
     else:
         username = "Unknown User"
     groups = get_groups_not_joined_by_user(user_id)
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT group_name, total_posts, total_users FROM MostPopularGroups")
+        popular_groups = cursor.fetchall()
 
-    return render(request, 'browse_groups.html', {'groups': groups, 'username': username})
+    return render(request, 'browse_groups.html', {'groups': groups, "popular_groups": popular_groups, 'username': username})
 
 def send_join_request(request, group_id):
     if request.method == 'POST':

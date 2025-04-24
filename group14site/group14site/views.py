@@ -7,6 +7,7 @@ def index(request):
         del request.session['user_id']
     error_message = ""
     success_message = ""
+    popular_groups = []
 
     if request.method == "POST":
         username = request.POST.get("username")

@@ -21,6 +21,11 @@ def get_total_post_count(group_id):
         count = c.fetchone()[0]
     return count
 
+def delete_comment(request, comment_id, recommendation_post_id):
+    with connection.cursor() as c:
+        c.execute("""DELETE FROM Comment WHERE comment_id = %s""", [comment_id])
+    return redirect('group_detail', recommendation_post_id)
+
 def leave_group(request, group_id):
     user_id = request.session.get('user_id')
     with connection.cursor() as c:
@@ -115,6 +120,11 @@ def group_feed(request, group_id):
         'username': username,
     }
 
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT group_name, total_posts, total_users FROM MostPopularGroups")
+
+        popular_groups = cursor.fetchall()
+
     return render(request, 'group_feed.html', context)
 
 def serve_group_image(request, group_id):
@@ -205,15 +215,17 @@ def group_detail(request, recommendation_post_id, group_id = None):
         group_id = cursor.fetchone()[0]
         cursor.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
         admin_id = cursor.fetchone()[0]
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        username = cursor.fetchone()[0]
 
     context = {
         'recommendation_post_id': recommendation_post_id,
         'post': post_data,
         'comments_for_post': all_comments,
         'admin_id': admin_id,
-        'user_id':request.session.get('user_id'),
+        'user_id':user_id,
         'group_id': group_id,
-        'username': username,
+        'username': username
     }
 
     return render(request, 'group_detail.html', context)
