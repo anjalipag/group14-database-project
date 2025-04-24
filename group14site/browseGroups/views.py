@@ -4,13 +4,20 @@ from django.db import connection
 
 def browse_groups(request):
     user_id = request.session.get('user_id')
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
     groups = get_groups_not_joined_by_user(user_id)
     with connection.cursor() as cursor:
         cursor.execute("SELECT group_name, total_posts, total_users FROM MostPopularGroups")
-
         popular_groups = cursor.fetchall()
 
-    return render(request, 'browse_groups.html', {'groups': groups, "popular_groups": popular_groups})
+    return render(request, 'browse_groups.html', {'groups': groups, "popular_groups": popular_groups, 'username': username})
 
 def send_join_request(request, group_id):
     if request.method == 'POST':

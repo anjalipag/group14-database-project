@@ -4,9 +4,17 @@ from django.db import connection
 
 def my_groups(request):
     user_id = request.session.get('user_id')
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
     groups = get_groups_joined_by_user(user_id)
     groups_created = get_groups_created(user_id)
-    return render(request, 'my_groups.html', {'groups': groups, 'groups_created': groups_created})
+
+    return render(request, 'my_groups.html', {'groups': groups, 'groups_created': groups_created, 'username': username})
 
 def get_groups_joined_by_user(user_id):
     with connection.cursor() as c:
@@ -63,10 +71,17 @@ def admin_view(request, group_id):
         with connection.cursor() as c:
             c.execute("""DELETE FROM GroupsMembers WHERE group_id = %s AND user_id = %s""", [group_id, uid_to_remove])
         return redirect('admin_view', group_id=group_id)
-
+    user_id = request.session.get('user_id')
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
     group_members = get_group_members(group_id,request.session.get('user_id'))
     group_name = get_group_name(group_id)
-    return render(request, 'admin_view.html', {'group_id': group_id, 'group_name': group_name, 'group_members': group_members})
+    return render(request, 'admin_view.html', {'group_id': group_id, 'group_name': group_name, 'group_members': group_members, 'username': username})
 
 def get_group_members(group_id, current_user):
     with connection.cursor() as c:
@@ -96,10 +111,17 @@ def manage_requests(request, group_id):
             elif action == "reject":
                 c.execute("""DELETE FROM GroupsMembers WHERE group_id = %s AND user_id = %s AND invitation_status = 'Pending'""", [group_id, uid])
         return redirect("manage_requests", group_id = group_id)
-
+    user_id = request.session.get('user_id')
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
     #If not trying to mod requests, just default and show pending requests
     with connection.cursor() as c:
         c.execute("""SELECT u.user_id, u.username FROM groupsmembers gm JOIN users u on gm.user_id = u.user_id WHERE gm.group_id=%s AND gm.invitation_status = 'Pending'""", [group_id])
 
         pending_requests = c.fetchall()
-    return render(request, 'manage_requests.html', {"group_id": group_id, "pending_requests": pending_requests,})
+    return render(request, 'manage_requests.html', {"group_id": group_id, "pending_requests": pending_requests,'username': username})

@@ -7,7 +7,16 @@ import psycopg2
 from django.http import HttpResponse
 
 def index(request):
-    return render(request, 'createGroups.html')
+    user_id = request.session.get('user_id')
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
+    return render(request, 'createGroups.html', { 'username': username})
 
 def create_group(request):
     if request.method == 'POST':

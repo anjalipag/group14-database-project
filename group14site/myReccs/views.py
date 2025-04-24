@@ -8,6 +8,14 @@ def user_recommendations(request):
         return HttpResponse("You must be logged in to see your recommendations.")
 
     with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
+
+    with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
                 rp.recommendation_post_id,
@@ -46,7 +54,8 @@ def user_recommendations(request):
         user_posts.append(post_data)
 
     context = {
-        'user_posts': user_posts
+        'user_posts': user_posts,
+        'username': username,
     }
     return render(request, 'user_recommendations.html', context)
 
@@ -94,6 +103,15 @@ def get_extra_info(recommendation_post_id):
                 return {'Author': result[0], 'Year Published': result[1]}
     return {}
 def comment_detail(request, recommendation_post_id):
+    user_id = request.session.get('user_id')
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
+
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
@@ -163,6 +181,7 @@ def comment_detail(request, recommendation_post_id):
         'comments_for_post': all_comments,
         'admin_id': admin_id,
         'user_id':request.session.get('user_id'),
+        'username': username,
     }
 
     return render(request, 'user_reccs_comments.html', context)

@@ -41,6 +41,16 @@ def delete_group(request, group_id):
 def group_feed(request, group_id):
     total_post_count = get_total_post_count(group_id)
     post_by_category ={}
+    user_id = request.session.get('user_id')
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
+
     with connection.cursor() as cursor:
         #get admin id for later to check if someone has admin permissions
         cursor.execute("SELECT admin_id FROM Groups WHERE group_id = %s", [group_id])
@@ -107,6 +117,7 @@ def group_feed(request, group_id):
         'category_names': category_names,
         'admin_id': admin_id,
         'user_id':request.session.get('user_id'),
+        'username': username,
     }
 
     with connection.cursor() as cursor:
@@ -131,6 +142,15 @@ def serve_group_image(request, group_id):
 
 def group_detail(request, recommendation_post_id, group_id = None):
     user_id = request.session.get('user_id')
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
+
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT
