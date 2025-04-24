@@ -25,9 +25,7 @@ def create_group(request):
         user_id = request.session.get('user_id')
         #idk this might not work rn
         group_photo = request.FILES.get('group_photo')
-        print(group_photo)
         photo_data = group_photo.read() if group_photo else None
-        print(photo_data)
     else:
         return
 
