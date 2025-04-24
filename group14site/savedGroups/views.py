@@ -24,7 +24,7 @@ def get_groups_joined_by_user(user_id):
             FROM groups g
             JOIN users u ON g.admin_id = u.user_id
             WHERE g.group_id IN (
-                SELECT group_id FROM groupsmembers WHERE user_id = %s
+                SELECT group_id FROM groupsmembers WHERE user_id = %s AND invitation_status = 'Accepted'
             )
             AND g.admin_id != %s
         """, [user_id, user_id])
