@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db import connection
 from groupFeed import views
 def user_recommendations(request):
@@ -49,6 +49,12 @@ def user_recommendations(request):
         'user_posts': user_posts
     }
     return render(request, 'user_recommendations.html', context)
+
+def delete_my_post(request, recommendation_post_id):
+    print(recommendation_post_id)
+    with connection.cursor() as c:
+        c.execute("""DELETE FROM RecommendationPost WHERE recommendation_post_id = %s""", [recommendation_post_id])
+    return redirect('user_recommendations')
 
 def get_extra_info(recommendation_post_id):
     with connection.cursor() as c:
