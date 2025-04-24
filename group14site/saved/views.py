@@ -3,8 +3,17 @@ from django.db import connection
 
 def index(request):
    saved_recs = get_saved_recs(request)
+   user_id = request.session.get('user_id')
+   with connection.cursor() as cursor:
+       cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+       user_row = cursor.fetchone()
+   if user_row:
+       username = user_row[0]
+   else:
+       username = "Unknown User"
    context = {
       'saved_recs': saved_recs,
+       'username': username,
    }
    return render(request, 'saved_recs.html', context)
 
@@ -48,6 +57,14 @@ def get_comments(rec_id):
 def delete_rec(request, rec_id):
     print("rec_id", rec_id)
     user_id = request.session.get('user_id')
+
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
+        user_row = cursor.fetchone()
+    if user_row:
+        username = user_row[0]
+    else:
+        username = "Unknown User"
     with connection.cursor() as c:
         c.execute("""
         DELETE FROM SavedRecommendations WHERE user_saved_id = %s AND saved_recommendation_id = %s
@@ -56,6 +73,7 @@ def delete_rec(request, rec_id):
     saved_recs = get_saved_recs(request)
     context = {
         'saved_recs': saved_recs,
+        'username': username,
     }
     return render(request, 'saved_recs.html', context)
 def handle_upvote(request, rec_id):
