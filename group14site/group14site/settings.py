@@ -91,27 +91,27 @@ WSGI_APPLICATION = 'group14site.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": DB_NAME,
-#         "USER": DB_USER,
-#         "PASSWORD": DB_PASSWORD,
-#         "HOST": DB_HOST,
-#         "PORT": DB_PORT,
-#     }
-# }
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "final_sql",
-        "USER": "postgres",
-        "PASSWORD": "Rs844416",
-        "HOST": "localhost",  # Add this line
-        "PORT": "5432",
+        "NAME": DB_NAME,
+        "USER": DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "HOST": DB_HOST,
+        "PORT": DB_PORT,
     }
 }
+#
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "final_sql",
+#         "USER": "postgres",
+#         "PASSWORD": "Rs844416",
+#         "HOST": "localhost",  # Add this line
+#         "PORT": "5432",
+#     }
+# }
 
 
 
