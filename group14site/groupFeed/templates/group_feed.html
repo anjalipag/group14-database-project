@@ -41,9 +41,37 @@
   </script>
    {% endfor %}
 {% endif %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <a class="nav-link"
+     href="{% url 'my_groups' %}"
+     style="font-size: 20px; font-weight: bold; padding-left: 20px; padding-top: 15px; display: inline-block; color: inherit;">
+     &#8592; Back to My Groups
+  </a>
+{% if user_id != admin_id %}
+  <form action="{% url 'leave_group' group_id %}" method="post" style="display:inline; padding-right: 25px; padding-top: 25px;" >
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to leave this group?');">Leave Group</button>
+  </form>
+  {% endif %}
+  {% if user_id == admin_id %}
+  <form action="{% url 'delete_group' group_id %}" method="post" style="display:inline; padding-right: 25px; padding-top: 25px;" >
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this group?');">Delete Group</button>
+  </form>
+  {% endif %}
+</div>
 <img src="{% url 'serve_group_image' group_id %}" class="rounded-circle mt-4" style="width: 300px; height:300px;object-fit:cover;padding-top: 15px; margin: 0 auto; display: block;" alt="Group image">
 <h2 class="mb-2 text-center" style="padding-top: 10px;">{{ group_title }}</h2>
 <h5 class="mb-2 text-center" style="padding-top: 5px; color: grey;"><em>{{ group_des }}</em></h5>
+<div class="d-flex justify-content-center my-4">
+  <div class="input-group w-50">
+    <input type="text" id="searchInput" class="form-control" placeholder="Search by title...">
+    <button class="btn btn-outline-secondary" type="button" id="searchButton">Search</button>
+    <button class="btn btn-outline-danger" type="button" id="clearButton">Clear</button>
+  </div>
+</div>
+<p id="noPostsMessage" class="text-center text-muted mt-3" style="display: none;">No posts found.</p>
+
 <div class="container my-5">
   <div class="text-right mb-4">
     <button class="btn btn-success" data-toggle="modal" data-target="#recommendationModal">
@@ -305,6 +333,35 @@ document.addEventListener('DOMContentLoaded', () => {
     suggestionsBox.innerHTML = '';
     titleInput.value = '';
   });
+});
+  document.getElementById('searchButton').addEventListener('click', function () {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const rows = document.querySelectorAll('tbody tr');
+  const noPostsMessage = document.getElementById('noPostsMessage');
+
+  let visibleCount = 0;
+
+  rows.forEach(row => {
+    const title = row.querySelector('td:first-child').textContent.toLowerCase();
+    if (title.includes(query)) {
+      row.style.display = '';
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+
+  if (visibleCount === 0) {
+    noPostsMessage.style.display = 'block';
+  } else {
+    noPostsMessage.style.display = 'none';
+  }
+});
+  document.getElementById("clearButton").addEventListener("click", function () {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("noPostsMessage").style.display = "none";
+  //reloads the page to its original state (no query)
+  window.location.href = window.location.pathname;
 });
 </script>
 

@@ -47,7 +47,7 @@
           <a href="{% url 'user_reccs_comments' post.post_id %}" class="btn btn-outline-info poppins-regular mb-2">See Comments</a>
         </div>
         <div class="card-body">
-          <p class="mb-3 poppins-regular"><strong>Notes:</strong> {{ post.description }}</p>
+          <p class="mb-3 poppins-regular"><strong>Description:</strong> {{ post.description }}</p>
 
           <div class="row text-center mb-3">
             <div class="col-md-3 mb-2">
@@ -73,12 +73,43 @@
           </div>
 
           {% if post.extra_info %}
-            <a href="{{ post.extra_info }}" target="_blank" class="btn btn-outline-info poppins-regular mb-2">Learn More</a>
+            <button type="button"
+                    class="btn btn-outline-info poppins-regular mb-2"
+                    data-toggle="modal"
+                    data-target="#infoModal{{ post.post_id }}">
+              Learn More
+            </button>
           {% endif %}
+
+
 
           <p class="text-muted poppins-regular mb-0">Posted on {{ post.time_stamp }}</p>
         </div>
       </div>
+<!-- Modal for displaying extra information -->
+<div class="modal fade" id="infoModal{{ post.post_id }}" tabindex="-1" role="dialog" aria-labelledby="infoModalLabel{{ post.post_id }}" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="infoModalLabel{{ post.post_id }}"><strong>Additional Information</strong></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {% if post.extra_info %}
+          {% for key, value in post.extra_info.items %}
+            <p><strong>{{ key }}:</strong> {{ value }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
     {% endfor %}
   {% else %}
     <div class="alert alert-warning" role="alert">
@@ -87,3 +118,8 @@
   {% endif %}
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Bootstrap and jQuery JS (required for modals to work) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
