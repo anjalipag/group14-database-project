@@ -213,6 +213,11 @@ def group_detail(request, recommendation_post_id, group_id = None):
         admin_id = cursor.fetchone()[0]
         cursor.execute("SELECT username FROM Users WHERE user_id = %s", [user_id])
         username = cursor.fetchone()[0]
+        cursor.execute("SELECT * FROM GroupsMembers WHERE user_id = %s AND group_id = %s AND invitation_status = 'Accepted'", [user_id, group_id])
+        row = cursor.fetchone()
+        membership = 0
+        if row:
+            membership = 1
 
     context = {
         'recommendation_post_id': recommendation_post_id,
@@ -221,7 +226,8 @@ def group_detail(request, recommendation_post_id, group_id = None):
         'admin_id': admin_id,
         'user_id':user_id,
         'group_id': group_id,
-        'username': username
+        'username': username,
+        'membership': membership
     }
 
     return render(request, 'group_detail.html', context)
